@@ -15,39 +15,29 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-#ifndef AIMAZE2__GAME_SCENE__HPP
-#define AIMAZE2__GAME_SCENE__HPP
+#ifndef AIMAZE2__SCORE__HPP
+#define AIMAZE2__SCORE__HPP
 #include <SFML/Graphics.hpp>
-#include "CollisionManager.hpp"
-#include "Ground.hpp"
-#include "ObstacleManager.hpp"
-#include "Player.hpp"
-#include "Score.hpp"
 
 namespace aimaze2 {
 
-class GameScene {
+class Score {
  public:
-  enum class SceneState { RUNNING, DEAD };
-
-  void init(Config::RndEngine* iRndEngine);
-  void update(Config::RndEngine* iRndEngine);
+  void init();
+  void update();
   void draw(sf::RenderWindow* oRender) const;
 
-  void playerJump();
-
  private:
-  static constexpr float kInitialGameVelocity = 400.f;
+  static constexpr float kVerticalOffsetSprite = 20.f;
+  static constexpr float kHorizontalOffsetSprite = 50.f;
 
-  float _gameVelocity;
-  Ground _ground;
-  Player _player;
-  Score _score;
-  ObstacleManager _obstacleManager;
-  CollisionManager _collisionManager;
-  SceneState _sceneState;
+  sf::Font _font;
+  sf::Text _scoreText;
+  long long _score;
+
+  void updateScoreValue();
 };
 
 }  // namespace aimaze2
 
-#endif  // AIMAZE2__GAME_SCENE__HPP
+#endif  // AIMAZE2__SCORE__HPP

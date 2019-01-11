@@ -24,6 +24,7 @@ void GameScene::init(Config::RndEngine* iRndEngine) {
 
   _ground.init(iRndEngine);
   _player.init();
+  _score.init();
   _obstacleManager.init();
 
   _sceneState = SceneState::RUNNING;
@@ -31,6 +32,7 @@ void GameScene::init(Config::RndEngine* iRndEngine) {
 
 void GameScene::update(Config::RndEngine* iRndEngine) {
   if (_sceneState == SceneState::RUNNING) {
+    _score.update();
     _player.update(_gameVelocity);
     _ground.update(_gameVelocity, iRndEngine);
     _obstacleManager.update(_gameVelocity, iRndEngine);
@@ -49,6 +51,7 @@ void GameScene::draw(sf::RenderWindow* oRender) const {
   _ground.draw(oRender);
   _player.draw(oRender);
   _obstacleManager.draw(oRender);
+  _score.draw(oRender);
 }
 
 void GameScene::playerJump() { _player.jump(); }
