@@ -34,6 +34,8 @@ class Config {
   static constexpr unsigned kFPSLogicUpdate = 1000;
   static constexpr float kDeltaTimeLogicUpdate = 1.f / kFPSLogicUpdate;
   static inline const sf::Color kFillColor{0, 0, 0};
+  static constexpr bool kDrawCollisionBox = true;
+  static inline const sf::Color kDebugColor{255, 0, 0};
 };
 
 }  // namespace aimaze2

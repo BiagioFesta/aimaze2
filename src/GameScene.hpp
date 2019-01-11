@@ -19,6 +19,7 @@
 #define AIMAZE2__GAME_SCENE__HPP
 #include <SFML/Graphics.hpp>
 #include "Ground.hpp"
+#include "ObstacleManager.hpp"
 #include "Player.hpp"
 
 namespace aimaze2 {
@@ -33,6 +34,7 @@ class GameScene {
   float _gameVelocity = 400.f;
   Ground _ground;
   Player _player;
+  ObstacleManager _obstacleManager;
 };
 
 }  // namespace aimaze2

@@ -15,43 +15,25 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-#ifndef AIMAZE2__PLAYER__HPP
-#define AIMAZE2__PLAYER__HPP
-#include <SFML/Graphics.hpp>
-#include <array>
+#ifndef AIMAZE2__OBSTACLE_MANAGER__HPP
+#define AIMAZE2__OBSTACLE_MANAGER__HPP
+#include <deque>
+#include "Obstacle.hpp"
 
 namespace aimaze2 {
 
-class Player {
+class ObstacleManager {
  public:
-  static inline const sf::Vector2f kPlayerPosition{80.f, 360.f};
-
   void init();
-  void update(const float iGameVelocity);
+  void update(const float iGameVelocity, Config::RndEngine* iRndEngine);
   void draw(sf::RenderWindow* oRender) const;
 
-  void jump();
-
-  sf::FloatRect getCollisionBox() const;
-
  private:
-  static constexpr std::size_t kNumTextures = 3;
-  enum TextureID : std::size_t { RUN_0, RUN_1, JUMP };
+  std::deque<Obstacle> _obstacles;
 
-  std::array<sf::Texture, kNumTextures> _textures;
-  sf::Sprite _playerSprite;
-  TextureID _idTexture;
-  bool _jumping = false;
-  float _velocityY;
-  float _gravity;
-
-  void applyGravity();
-  void updateAnimation(const float iGameVelocity);
-  void drawCollisionBox(sf::RenderWindow* oRender) const;
-
-  static TextureID NextFrameAnimation(const TextureID iTextureId) noexcept;
+  void updateSpawn(const float iGameVelocity, Config::RndEngine* iRndEngine);
 };
 
 }  // namespace aimaze2
 
-#endif  // AIMAZE2__PLAYER__HPP
+#endif  // AIMAZE2__OBSTACLE_MANAGER__HPP

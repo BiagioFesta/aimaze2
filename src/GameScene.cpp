@@ -22,16 +22,19 @@ namespace aimaze2 {
 void GameScene::init(Config::RndEngine* iRndEngine) {
   _ground.init(iRndEngine);
   _player.init();
+  _obstacleManager.init();
 }
 
 void GameScene::update(Config::RndEngine* iRndEngine) {
   _ground.update(_gameVelocity, iRndEngine);
   _player.update(_gameVelocity);
+  _obstacleManager.update(_gameVelocity, iRndEngine);
 }
 
 void GameScene::draw(sf::RenderWindow* oRender) const {
   _ground.draw(oRender);
   _player.draw(oRender);
+  _obstacleManager.draw(oRender);
 }
 
 }  // namespace aimaze2

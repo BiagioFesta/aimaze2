@@ -15,43 +15,56 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-#ifndef AIMAZE2__PLAYER__HPP
-#define AIMAZE2__PLAYER__HPP
+#ifndef AIMAZE2__OBSTACLE__HPP
+#define AIMAZE2__OBSTACLE__HPP
 #include <SFML/Graphics.hpp>
 #include <array>
+#include "Config.hpp"
 
 namespace aimaze2 {
 
-class Player {
+class Obstacle {
  public:
-  static inline const sf::Vector2f kPlayerPosition{80.f, 360.f};
+  static constexpr std::size_t kNumTypeOfObstacles = 6;
+  enum class ObstacleType {
+    CACTUS_SMALL,
+    CACTUS_BIG,
+    CACTUS_LARGE,
+    BIRD_LOW,
+    BIRD_MEDIUM,
+    BIRD_HIGH
+  };
 
-  void init();
+  static void initTextures();
+
+  void init(const ObstacleType iObstacleType);
   void update(const float iGameVelocity);
   void draw(sf::RenderWindow* oRender) const;
 
-  void jump();
+  bool isOutOfScreenOnLeft() const;
 
   sf::FloatRect getCollisionBox() const;
 
  private:
-  static constexpr std::size_t kNumTextures = 3;
-  enum TextureID : std::size_t { RUN_0, RUN_1, JUMP };
+  enum TextureID : std::size_t {
+    CACTUS_SMALL,
+    CACTUS_BIG,
+    CACTUS_LARGE,
+    BIRD_0,
+    BIRD_1
+  };
+  static constexpr std::size_t kNumTextures = 5;
+  static inline std::array<sf::Texture, kNumTextures> kTextures;
 
-  std::array<sf::Texture, kNumTextures> _textures;
-  sf::Sprite _playerSprite;
-  TextureID _idTexture;
-  bool _jumping = false;
-  float _velocityY;
-  float _gravity;
+  sf::Sprite _sprite;
+  TextureID _textureID;
 
-  void applyGravity();
-  void updateAnimation(const float iGameVelocity);
   void drawCollisionBox(sf::RenderWindow* oRender) const;
+  void updateAnimation();
 
-  static TextureID NextFrameAnimation(const TextureID iTextureId) noexcept;
+  static TextureID GetFirstTexture(const ObstacleType iObstacleType);
 };
 
 }  // namespace aimaze2
 
-#endif  // AIMAZE2__PLAYER__HPP
+#endif  //  AIMAZE2__OBSTACLE__HPP

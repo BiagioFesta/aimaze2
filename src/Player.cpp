@@ -41,10 +41,12 @@ void Player::update(const float iGameVelocity) {
   applyGravity();
 
   // testing
+  static sf::Clock clock;
   static int accumulator = 0;
-  if (accumulator >= 3.f / Config::kDeltaTimeLogicUpdate) {
+  if (accumulator >= 2.f / Config::kDeltaTimeLogicUpdate) {
     jump();
     accumulator = 0;
+    clock.restart();
   } else {
     ++accumulator;
   }
@@ -52,6 +54,10 @@ void Player::update(const float iGameVelocity) {
 
 void Player::draw(sf::RenderWindow* oRender) const {
   oRender->draw(_playerSprite);
+
+  if constexpr (Config::kDrawCollisionBox) {
+    drawCollisionBox(oRender);
+  }
 }
 
 void Player::jump() {
@@ -63,6 +69,10 @@ void Player::jump() {
     _velocityY = -kVelocityJump;
     _gravity = kGravity;
   }
+}
+
+sf::FloatRect Player::getCollisionBox() const {
+  return _playerSprite.getGlobalBounds();
 }
 
 void Player::applyGravity() {
@@ -94,6 +104,19 @@ void Player::updateAnimation(const float iGameVelocity) {
     _idTexture = NextFrameAnimation(_idTexture);
     accumulator = 0;
   }
+}
+
+void Player::drawCollisionBox(sf::RenderWindow* oRender) const {
+  static sf::RectangleShape box;
+
+  const auto collisionBox = getCollisionBox();
+  box.setSize(sf::Vector2f{collisionBox.width, collisionBox.height});
+  box.setOutlineColor(Config::kDebugColor);
+  box.setOutlineThickness(2.f);
+  box.setFillColor(sf::Color{0, 0, 0, 0});
+  box.setPosition(sf::Vector2f{collisionBox.left, collisionBox.top});
+
+  oRender->draw(box);
 }
 
 Player::TextureID Player::NextFrameAnimation(

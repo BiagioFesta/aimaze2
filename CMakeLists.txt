@@ -13,6 +13,8 @@ add_executable(${PROJECT_NAME}
   ${PROJECT_SOURCE_DIR}/src/AIMaze.cpp
   ${PROJECT_SOURCE_DIR}/src/GameScene.cpp
   ${PROJECT_SOURCE_DIR}/src/Ground.cpp
-  ${PROJECT_SOURCE_DIR}/src/Player.cpp)
+  ${PROJECT_SOURCE_DIR}/src/Player.cpp
+  ${PROJECT_SOURCE_DIR}/src/Obstacle.cpp
+  ${PROJECT_SOURCE_DIR}/src/ObstacleManager.cpp)
 target_link_libraries(${PROJECT_NAME} sfml-graphics sfml-window sfml-system)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
