@@ -25,11 +25,13 @@ void Player::init() {
   std::get<TextureID::RUN_0>(_textures).loadFromFile("data/dinorun0000.png");
   std::get<TextureID::RUN_1>(_textures).loadFromFile("data/dinorun0001.png");
   std::get<TextureID::JUMP>(_textures).loadFromFile("data/dinoJump0000.png");
+  std::get<TextureID::DEAD>(_textures).loadFromFile("data/dinoDead0000.png");
 
   _playerSprite.setPosition(kPlayerPosition);
 
   _idTexture = TextureID::RUN_0;
   _jumping = false;
+  _dead = false;
   _velocityY = 0.f;
   _gravity = 0.f;
 }
@@ -43,7 +45,7 @@ void Player::update(const float iGameVelocity) {
   // testing
   static sf::Clock clock;
   static int accumulator = 0;
-  if (accumulator >= 2.f / Config::kDeltaTimeLogicUpdate) {
+  if (accumulator >= 4.5f / Config::kDeltaTimeLogicUpdate) {
     jump();
     accumulator = 0;
     clock.restart();
@@ -64,12 +66,14 @@ void Player::jump() {
   static constexpr float kVelocityJump = 800.f;
   static constexpr float kGravity = 2000.f;
 
-  if (!_jumping) {
+  if (!_jumping && !_dead) {
     _jumping = true;
     _velocityY = -kVelocityJump;
     _gravity = kGravity;
   }
 }
+
+void Player::die() { _dead = true; }
 
 sf::FloatRect Player::getCollisionBox() const {
   return _playerSprite.getGlobalBounds();
@@ -89,7 +93,9 @@ void Player::updateAnimation(const float iGameVelocity) {
   static constexpr float kScaleVelocityAnimation = 80.f;
   static float accumulator = 0.f;
 
-  if (_jumping == true) {
+  if (_dead == true) {
+    _idTexture = TextureID::DEAD;
+  } else if (_jumping == true) {
     _idTexture = TextureID::JUMP;
   } else if (_jumping == false && _idTexture == TextureID::JUMP) {
     _idTexture = TextureID::RUN_0;
@@ -130,6 +136,8 @@ Player::TextureID Player::NextFrameAnimation(
       return TextureID::RUN_0;
     case TextureID::JUMP:
       return TextureID::JUMP;
+    case TextureID::DEAD:
+      return TextureID::DEAD;
   }
 }
 

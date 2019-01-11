@@ -35,7 +35,10 @@ aimaze2::Obstacle::ObstacleType GetRndObstacleType(
 
 namespace aimaze2 {
 
-void ObstacleManager::init() { Obstacle::initTextures(); }
+void ObstacleManager::init() {
+  Obstacle::initTextures();
+  _obstacles.clear();
+}
 
 void ObstacleManager::update(const float iGameVelocity,
                              Config::RndEngine* iRndEngine) {
@@ -54,6 +57,10 @@ void ObstacleManager::draw(sf::RenderWindow* oRender) const {
   for (const auto& obstacle : _obstacles) {
     obstacle.draw(oRender);
   }
+}
+
+const std::deque<Obstacle>& ObstacleManager::getObstacles() const noexcept {
+  return _obstacles;
 }
 
 void ObstacleManager::updateSpawn(const float iGameVelocity,

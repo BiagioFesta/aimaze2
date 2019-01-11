@@ -15,27 +15,36 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-#ifndef AIMAZE2__OBSTACLE_MANAGER__HPP
-#define AIMAZE2__OBSTACLE_MANAGER__HPP
-#include <deque>
+#ifndef AIMAZE2__COLLISION_MANAGER__HPP
+#define AIMAZE2__COLLISION_MANAGER__HPP
 #include "Obstacle.hpp"
+#include "Player.hpp"
 
 namespace aimaze2 {
 
-class ObstacleManager {
+class CollisionManager {
  public:
-  void init();
-  void update(const float iGameVelocity, Config::RndEngine* iRndEngine);
-  void draw(sf::RenderWindow* oRender) const;
-
-  const std::deque<Obstacle>& getObstacles() const noexcept;
-
- private:
-  std::deque<Obstacle> _obstacles;
-
-  void updateSpawn(const float iGameVelocity, Config::RndEngine* iRndEngine);
+  template <typename ObstacleContainer>
+  static bool playerCollided(const Player& iPlayer,
+                             const ObstacleContainer& iObstacleContainer);
 };
+
+template <typename ObstacleContainer>
+bool CollisionManager::playerCollided(
+    const Player& iPlayer,
+    const ObstacleContainer& iObstacleContainer) {
+  const auto playerBox = iPlayer.getCollisionBox();
+
+  for (const auto& obstacle : iObstacleContainer) {
+    const auto obstacleBox = obstacle.getCollisionBox();
+    if (playerBox.intersects(obstacleBox)) {
+      return true;
+    }
+  }
+
+  return false;
+}
 
 }  // namespace aimaze2
 
-#endif  // AIMAZE2__OBSTACLE_MANAGER__HPP
+#endif  // AIMAZE2__COLLISION_MANAGER__HPP

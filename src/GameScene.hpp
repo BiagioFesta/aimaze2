@@ -18,6 +18,7 @@
 #ifndef AIMAZE2__GAME_SCENE__HPP
 #define AIMAZE2__GAME_SCENE__HPP
 #include <SFML/Graphics.hpp>
+#include "CollisionManager.hpp"
 #include "Ground.hpp"
 #include "ObstacleManager.hpp"
 #include "Player.hpp"
@@ -26,15 +27,21 @@ namespace aimaze2 {
 
 class GameScene {
  public:
+  enum class SceneState { RUNNING, DEAD };
+
   void init(Config::RndEngine* iRndEngine);
   void update(Config::RndEngine* iRndEngine);
   void draw(sf::RenderWindow* oRender) const;
 
  private:
-  float _gameVelocity = 400.f;
+  static constexpr float kInitialGameVelocity = 400.f;
+
+  float _gameVelocity;
   Ground _ground;
   Player _player;
   ObstacleManager _obstacleManager;
+  CollisionManager _collisionManager;
+  SceneState _sceneState;
 };
 
 }  // namespace aimaze2

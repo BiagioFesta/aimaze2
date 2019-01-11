@@ -20,15 +20,29 @@
 namespace aimaze2 {
 
 void GameScene::init(Config::RndEngine* iRndEngine) {
+  _gameVelocity = kInitialGameVelocity;
+
   _ground.init(iRndEngine);
   _player.init();
   _obstacleManager.init();
+
+  _sceneState = SceneState::RUNNING;
 }
 
 void GameScene::update(Config::RndEngine* iRndEngine) {
-  _ground.update(_gameVelocity, iRndEngine);
-  _player.update(_gameVelocity);
-  _obstacleManager.update(_gameVelocity, iRndEngine);
+  if (_sceneState == SceneState::RUNNING) {
+    _player.update(_gameVelocity);
+    _ground.update(_gameVelocity, iRndEngine);
+    _obstacleManager.update(_gameVelocity, iRndEngine);
+
+    if (_collisionManager.playerCollided(_player,
+                                         _obstacleManager.getObstacles())) {
+      _sceneState = SceneState::DEAD;
+    }
+  } else if (_sceneState == SceneState::DEAD) {
+    _player.die();
+    _player.update(_gameVelocity);
+  }
 }
 
 void GameScene::draw(sf::RenderWindow* oRender) const {

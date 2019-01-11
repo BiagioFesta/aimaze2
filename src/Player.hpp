@@ -31,17 +31,19 @@ class Player {
   void draw(sf::RenderWindow* oRender) const;
 
   void jump();
+  void die();
 
   sf::FloatRect getCollisionBox() const;
 
  private:
-  static constexpr std::size_t kNumTextures = 3;
-  enum TextureID : std::size_t { RUN_0, RUN_1, JUMP };
+  static constexpr std::size_t kNumTextures = 4;
+  enum TextureID : std::size_t { RUN_0, RUN_1, JUMP, DEAD };
 
   std::array<sf::Texture, kNumTextures> _textures;
   sf::Sprite _playerSprite;
   TextureID _idTexture;
-  bool _jumping = false;
+  bool _jumping;
+  bool _dead;
   float _velocityY;
   float _gravity;
 
