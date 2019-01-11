@@ -114,9 +114,10 @@ void Obstacle::updateAnimation() {
       _sprite.setTexture(kTextures[_textureID], true);
       accumulator -= kTimePerFrame;
     }
+    accumulator += Config::kDeltaTimeLogicUpdate;
+  } else {
+    accumulator = 0.f;
   }
-
-  accumulator += Config::kDeltaTimeLogicUpdate;
 }
 
 Obstacle::TextureID Obstacle::GetFirstTexture(

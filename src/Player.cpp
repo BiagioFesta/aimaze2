@@ -86,7 +86,8 @@ void Player::applyGravity() {
 }
 
 void Player::updateAnimation(const float iGameVelocity) {
-  static int accumulator = 0;
+  static constexpr float kScaleVelocityAnimation = 80.f;
+  static float accumulator = 0.f;
 
   if (_jumping == true) {
     _idTexture = TextureID::JUMP;
@@ -97,13 +98,14 @@ void Player::updateAnimation(const float iGameVelocity) {
   assert(_idTexture < _textures.size());
   _playerSprite.setTexture(_textures[_idTexture], true);
 
-  int kTickPerFrame = 50.f / (Config::kDeltaTimeLogicUpdate * iGameVelocity);
+  const float timePerFrame = kScaleVelocityAnimation / iGameVelocity;
 
-  ++accumulator;
-  if (accumulator >= kTickPerFrame) {
+  if (timePerFrame <= accumulator) {
     _idTexture = NextFrameAnimation(_idTexture);
-    accumulator = 0;
+    accumulator -= timePerFrame;
   }
+
+  accumulator += Config::kDeltaTimeLogicUpdate;
 }
 
 void Player::drawCollisionBox(sf::RenderWindow* oRender) const {
