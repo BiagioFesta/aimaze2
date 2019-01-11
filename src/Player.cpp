@@ -41,17 +41,6 @@ void Player::update(const float iGameVelocity) {
 
   _playerSprite.move({0.f, _velocityY * Config::kDeltaTimeLogicUpdate});
   applyGravity();
-
-  // testing
-  static sf::Clock clock;
-  static int accumulator = 0;
-  if (accumulator >= 4.5f / Config::kDeltaTimeLogicUpdate) {
-    jump();
-    accumulator = 0;
-    clock.restart();
-  } else {
-    ++accumulator;
-  }
 }
 
 void Player::draw(sf::RenderWindow* oRender) const {
@@ -76,7 +65,11 @@ void Player::jump() {
 void Player::die() { _dead = true; }
 
 sf::FloatRect Player::getCollisionBox() const {
-  return _playerSprite.getGlobalBounds();
+  auto spriteBox = _playerSprite.getGlobalBounds();
+  spriteBox.width -= 40.f;
+  spriteBox.left += 20.f;
+
+  return spriteBox;
 }
 
 void Player::applyGravity() {

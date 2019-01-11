@@ -51,4 +51,6 @@ void GameScene::draw(sf::RenderWindow* oRender) const {
   _obstacleManager.draw(oRender);
 }
 
+void GameScene::playerJump() { _player.jump(); }
+
 }  // namespace aimaze2

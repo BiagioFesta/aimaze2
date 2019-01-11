@@ -33,6 +33,8 @@ class GameScene {
   void update(Config::RndEngine* iRndEngine);
   void draw(sf::RenderWindow* oRender) const;
 
+  void playerJump();
+
  private:
   static constexpr float kInitialGameVelocity = 400.f;
 
