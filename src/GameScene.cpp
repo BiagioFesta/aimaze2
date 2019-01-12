@@ -49,8 +49,8 @@ void GameScene::update(Config::RndEngine* iRndEngine) {
 
 void GameScene::draw(sf::RenderWindow* oRender) const {
   _ground.draw(oRender);
-  _player.draw(oRender);
   _obstacleManager.draw(oRender);
+  _player.draw(oRender);
   _score.draw(oRender);
 }
 

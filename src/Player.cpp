@@ -39,8 +39,10 @@ void Player::init() {
 void Player::update(const float iGameVelocity) {
   updateAnimation(iGameVelocity);
 
-  _playerSprite.move({0.f, _velocityY * Config::kDeltaTimeLogicUpdate});
-  applyGravity();
+  if (_dead == false) {
+    _playerSprite.move({0.f, _velocityY * Config::kDeltaTimeLogicUpdate});
+    applyGravity();
+  }
 }
 
 void Player::draw(sf::RenderWindow* oRender) const {
@@ -66,8 +68,10 @@ void Player::die() { _dead = true; }
 
 sf::FloatRect Player::getCollisionBox() const {
   auto spriteBox = _playerSprite.getGlobalBounds();
-  spriteBox.width -= 40.f;
-  spriteBox.left += 20.f;
+  spriteBox.width -= 50.f;
+  spriteBox.left += 25.f;
+  spriteBox.height -= 10.f;
+  spriteBox.top += 10.f;
 
   return spriteBox;
 }
