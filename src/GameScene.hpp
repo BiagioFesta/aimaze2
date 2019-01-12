@@ -41,6 +41,8 @@ class GameScene {
  private:
   static constexpr float kInitialGameVelocity = 400.f;
 
+  void updateGameVelocity();
+
   float _gameVelocity;
   Ground _ground;
   Player _player;

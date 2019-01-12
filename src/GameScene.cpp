@@ -32,6 +32,8 @@ void GameScene::init(Config::RndEngine* iRndEngine) {
 
 void GameScene::update(Config::RndEngine* iRndEngine) {
   if (_sceneState == SceneState::RUNNING) {
+    updateGameVelocity();
+
     _score.update(_gameVelocity);
     _player.update(_gameVelocity);
     _ground.update(_gameVelocity, iRndEngine);
@@ -59,5 +61,18 @@ void GameScene::playerJump() { _player.jump(); }
 void GameScene::playerDuckOn() { _player.duckOn(); }
 
 void GameScene::playerDuckOff() { _player.duckOff(); }
+
+void GameScene::updateGameVelocity() {
+  constexpr float kTimeToIncrement = 0.2;
+  constexpr float kDeltaIncrement = 1.f;
+  static float accumulator = 0.f;
+
+  if (kTimeToIncrement <= accumulator) {
+    _gameVelocity += kDeltaIncrement;
+    accumulator -= kTimeToIncrement;
+  }
+
+  accumulator += Config::kDeltaTimeLogicUpdate;
+}
 
 }  // namespace aimaze2
