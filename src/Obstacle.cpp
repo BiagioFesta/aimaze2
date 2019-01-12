@@ -91,8 +91,8 @@ sf::FloatRect Obstacle::getCollisionBox() const {
   if (_textureID == TextureID::BIRD_0 || _textureID == TextureID::BIRD_1) {
     box.width -= 4.f;
     box.left += 2.f;
-    box.height -= 10.f;
-    box.top += 5.f;
+    box.height -= 40.f;
+    box.top += 20.f;
   }
   return box;
 }
