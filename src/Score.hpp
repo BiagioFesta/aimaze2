@@ -24,7 +24,7 @@ namespace aimaze2 {
 class Score {
  public:
   void init();
-  void update();
+  void update(const float iGameVelocity);
   void draw(sf::RenderWindow* oRender) const;
 
  private:
@@ -35,7 +35,7 @@ class Score {
   sf::Text _scoreText;
   long long _score;
 
-  void updateScoreValue();
+  void updateScoreValue(const float iGameVelocity);
 };
 
 }  // namespace aimaze2

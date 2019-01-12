@@ -30,8 +30,8 @@ void Score::init() {
   _score = 0;
 }
 
-void Score::update() {
-  updateScoreValue();
+void Score::update(const float iGameVelocity) {
+  updateScoreValue(iGameVelocity);
 
   _scoreText.setString(std::to_string(_score));
   _scoreText.setPosition({Config::kWindowWidth -
@@ -42,13 +42,15 @@ void Score::update() {
 
 void Score::draw(sf::RenderWindow* oRender) const { oRender->draw(_scoreText); }
 
-void Score::updateScoreValue() {
-  static constexpr float kTimePerIncrement = 0.1f;
+void Score::updateScoreValue(const float iGameVelocity) {
+  static constexpr float kScale = 35.f;
   static float accumulator = 0.0f;
 
-  if (kTimePerIncrement <= accumulator) {
+  const float timePerIncrement = kScale / iGameVelocity;
+
+  if (timePerIncrement <= accumulator) {
     ++_score;
-    accumulator -= kTimePerIncrement;
+    accumulator -= timePerIncrement;
   }
   accumulator += Config::kDeltaTimeLogicUpdate;
 }

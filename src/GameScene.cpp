@@ -32,7 +32,7 @@ void GameScene::init(Config::RndEngine* iRndEngine) {
 
 void GameScene::update(Config::RndEngine* iRndEngine) {
   if (_sceneState == SceneState::RUNNING) {
-    _score.update();
+    _score.update(_gameVelocity);
     _player.update(_gameVelocity);
     _ground.update(_gameVelocity, iRndEngine);
     _obstacleManager.update(_gameVelocity, iRndEngine);
