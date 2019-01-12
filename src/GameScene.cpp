@@ -56,4 +56,8 @@ void GameScene::draw(sf::RenderWindow* oRender) const {
 
 void GameScene::playerJump() { _player.jump(); }
 
+void GameScene::playerDuckOn() { _player.duckOn(); }
+
+void GameScene::playerDuckOff() { _player.duckOff(); }
+
 }  // namespace aimaze2

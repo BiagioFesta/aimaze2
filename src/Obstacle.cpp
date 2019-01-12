@@ -36,7 +36,7 @@ sf::Vector2f GetInitialPosition(
     case Obstacle::ObstacleType::BIRD_LOW:
       return sf::Vector2f{Config::kWindowWidth, 390.f};
     case Obstacle::ObstacleType::BIRD_MEDIUM:
-      return sf::Vector2f{Config::kWindowWidth, 350.f};
+      return sf::Vector2f{Config::kWindowWidth, 335.f};
     case Obstacle::ObstacleType::BIRD_HIGH:
       return sf::Vector2f{Config::kWindowWidth, 250.f};
   }

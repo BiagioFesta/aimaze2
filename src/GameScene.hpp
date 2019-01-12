@@ -35,6 +35,8 @@ class GameScene {
   void draw(sf::RenderWindow* oRender) const;
 
   void playerJump();
+  void playerDuckOn();
+  void playerDuckOff();
 
  private:
   static constexpr float kInitialGameVelocity = 400.f;

@@ -32,24 +32,28 @@ class Player {
 
   void jump();
   void die();
+  void duckOn();
+  void duckOff();
 
   sf::FloatRect getCollisionBox() const;
 
  private:
-  static constexpr std::size_t kNumTextures = 4;
-  enum TextureID : std::size_t { RUN_0, RUN_1, JUMP, DEAD };
+  static constexpr std::size_t kNumTextures = 6;
+  enum TextureID : std::size_t { RUN_0, RUN_1, JUMP, DEAD, DUCK_0, DUCK_1 };
 
   std::array<sf::Texture, kNumTextures> _textures;
   sf::Sprite _playerSprite;
   TextureID _idTexture;
   bool _jumping;
   bool _dead;
+  bool _ducking;
   float _velocityY;
   float _gravity;
 
   void applyGravity();
   void updateAnimation(const float iGameVelocity);
   void drawCollisionBox(sf::RenderWindow* oRender) const;
+  void resetGroundPosition();
 
   static TextureID NextFrameAnimation(const TextureID iTextureId) noexcept;
 };

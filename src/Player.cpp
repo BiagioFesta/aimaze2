@@ -26,12 +26,15 @@ void Player::init() {
   std::get<TextureID::RUN_1>(_textures).loadFromFile("data/dinorun0001.png");
   std::get<TextureID::JUMP>(_textures).loadFromFile("data/dinoJump0000.png");
   std::get<TextureID::DEAD>(_textures).loadFromFile("data/dinoDead0000.png");
+  std::get<TextureID::DUCK_0>(_textures).loadFromFile("data/dinoduck0000.png");
+  std::get<TextureID::DUCK_1>(_textures).loadFromFile("data/dinoduck0001.png");
 
   _playerSprite.setPosition(kPlayerPosition);
 
   _idTexture = TextureID::RUN_0;
   _jumping = false;
   _dead = false;
+  _ducking = false;
   _velocityY = 0.f;
   _gravity = 0.f;
 }
@@ -54,17 +57,35 @@ void Player::draw(sf::RenderWindow* oRender) const {
 }
 
 void Player::jump() {
-  static constexpr float kVelocityJump = 800.f;
+  static constexpr float kVelocityJump = 900.f;
   static constexpr float kGravity = 2000.f;
 
   if (!_jumping && !_dead) {
     _jumping = true;
+    duckOff();
     _velocityY = -kVelocityJump;
     _gravity = kGravity;
   }
 }
 
-void Player::die() { _dead = true; }
+void Player::die() {
+  _dead = true;
+  _jumping = false;
+  duckOff();
+}
+
+void Player::duckOn() {
+  if (!_jumping && !_dead) {
+    _ducking = true;
+  }
+}
+
+void Player::duckOff() {
+  if (_ducking) {
+    _ducking = false;
+    resetGroundPosition();
+  }
+}
 
 sf::FloatRect Player::getCollisionBox() const {
   auto spriteBox = _playerSprite.getGlobalBounds();
@@ -82,7 +103,7 @@ void Player::applyGravity() {
   } else {
     _jumping = false;
     _velocityY = 0;
-    _playerSprite.setPosition(kPlayerPosition);
+    resetGroundPosition();
   }
 }
 
@@ -94,7 +115,11 @@ void Player::updateAnimation(const float iGameVelocity) {
     _idTexture = TextureID::DEAD;
   } else if (_jumping == true) {
     _idTexture = TextureID::JUMP;
-  } else if (_jumping == false && _idTexture == TextureID::JUMP) {
+  } else if (_ducking == true) {
+    if (_idTexture != TextureID::DUCK_0 && _idTexture != TextureID::DUCK_1) {
+      _idTexture = TextureID::DUCK_0;
+    }
+  } else if (_idTexture != TextureID::RUN_0 && _idTexture != TextureID::RUN_1) {
     _idTexture = TextureID::RUN_0;
   }
 
@@ -124,6 +149,14 @@ void Player::drawCollisionBox(sf::RenderWindow* oRender) const {
   oRender->draw(box);
 }
 
+void Player::resetGroundPosition() {
+  if (_ducking) {
+    _playerSprite.setPosition(kPlayerPosition + sf::Vector2f{0.f, 50.f});
+  } else if (!_jumping) {
+    _playerSprite.setPosition(kPlayerPosition);
+  }
+}
+
 Player::TextureID Player::NextFrameAnimation(
     const TextureID iTextureId) noexcept {
   switch (iTextureId) {
@@ -135,6 +168,10 @@ Player::TextureID Player::NextFrameAnimation(
       return TextureID::JUMP;
     case TextureID::DEAD:
       return TextureID::DEAD;
+    case TextureID::DUCK_0:
+      return TextureID::DUCK_1;
+    case TextureID::DUCK_1:
+      return TextureID::DUCK_0;
   }
 }
 
