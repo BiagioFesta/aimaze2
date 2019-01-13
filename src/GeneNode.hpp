@@ -31,11 +31,22 @@ class GeneNode {
            const LayerID iLayerID,
            const bool isBias);
 
+  NodeType getNodeType() const noexcept;
+  NodeID getNodeID() const noexcept;
+  LayerID getLayerID() const noexcept;
+  bool isBiasNode() const noexcept;
+  float getPureValue() const noexcept;
+  float getValueWithActivation() const noexcept;
+  void setValue(const float iValue) noexcept;
+
  private:
   NodeType _nodeType;
   NodeID _nodeID;
   LayerID _layerID;
   bool _isBias;
+  float _value;
+
+  static float computeActivationValue(const float iValue);
 };
 
 }  // namespace aimaze2

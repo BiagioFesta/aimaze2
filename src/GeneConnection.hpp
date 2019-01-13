@@ -26,12 +26,24 @@ class GeneConnection {
   using NodeID = GeneNode::NodeID;
   using InnovationNum = int;
 
+  GeneConnection(const NodeID iNodeFrom,
+                 const NodeID iNodeTo,
+                 const float iWeight,
+                 const InnovationNum iInnovationNum);
+
+  NodeID getNodeFromID() const noexcept;
+  NodeID getNodeToID() const noexcept;
+  float getWeight() const noexcept;
+  InnovationNum getInnovationNum() const noexcept;
+  bool isEnabled() const noexcept;
+  void setEnabled(const bool iEnabled) noexcept;
+
  private:
   NodeID _nodeFrom;
   NodeID _nodeTo;
   float _weight;
-  bool _enabled;
   InnovationNum _innovationNum;
+  bool _enabled = true;
 };
 
 }  // namespace aimaze2

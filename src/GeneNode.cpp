@@ -16,6 +16,7 @@
 
 */
 #include "GeneNode.hpp"
+#include <cmath>
 
 namespace aimaze2 {
 
@@ -26,6 +27,32 @@ GeneNode::GeneNode(const NodeType iNodeType,
     : _nodeType(iNodeType),
       _nodeID(iNodeID),
       _layerID(iLayerID),
-      _isBias(isBias) {}
+      _isBias(isBias),
+      _value(_isBias ? 1.f : 0.f) {}
+
+GeneNode::NodeType GeneNode::getNodeType() const noexcept { return _nodeType; }
+
+GeneNode::NodeID GeneNode::getNodeID() const noexcept { return _nodeID; }
+
+GeneNode::LayerID GeneNode::getLayerID() const noexcept { return _layerID; }
+
+bool GeneNode::isBiasNode() const noexcept { return _isBias; }
+
+float GeneNode::getPureValue() const noexcept { return _value; }
+
+float GeneNode::getValueWithActivation() const noexcept {
+  if (_nodeType == NodeType::INPUT || _isBias) {
+    return _value;
+  }
+
+  return computeActivationValue(_value);
+}
+
+void GeneNode::setValue(const float iValue) noexcept { _value = iValue; }
+
+float GeneNode::computeActivationValue(const float iValue) {
+  constexpr float kCoefficient = -4.9f;
+  return 1.f / (1.f + expf(kCoefficient * iValue));
+}
 
 }  // namespace aimaze2
