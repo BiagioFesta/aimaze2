@@ -16,6 +16,25 @@ add_executable(${PROJECT_NAME}
   ${PROJECT_SOURCE_DIR}/src/Player.cpp
   ${PROJECT_SOURCE_DIR}/src/Obstacle.cpp
   ${PROJECT_SOURCE_DIR}/src/ObstacleManager.cpp
-  ${PROJECT_SOURCE_DIR}/src/Score.cpp)
+  ${PROJECT_SOURCE_DIR}/src/Score.cpp
+  ${PROJECT_SOURCE_DIR}/src/Genome.cpp
+  ${PROJECT_SOURCE_DIR}/src/GeneNode.cpp)
 target_link_libraries(${PROJECT_NAME} sfml-graphics sfml-window sfml-system)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+
+option(BUILD_TESTS "Compile Unit Tests" NO)
+if(${BUILD_TESTS})
+  find_package(GTest REQUIRED)
+
+  add_executable(${PROJECT_NAME}_test
+    ${PROJECT_SOURCE_DIR}/test/main.cpp
+    ${PROJECT_SOURCE_DIR}/src/Genome.cpp
+    ${PROJECT_SOURCE_DIR}/src/GeneNode.cpp
+    ${PROJECT_SOURCE_DIR}/test/testGenome.cpp)
+  target_include_directories(${PROJECT_NAME}_test PRIVATE src)
+  target_link_libraries(${PROJECT_NAME}_test GTest::GTest GTest::Main)
+  target_compile_features(${PROJECT_NAME}_test PRIVATE cxx_std_17)
+
+  include(CTest)
+  add_test(NAME TestAll COMMAND ${PROJECT_NAME}_test)
+endif()

@@ -1,5 +1,6 @@
 [requires]
 sfml/2.5.1@bincrafters/stable
+gtest/1.8.1@bincrafters/stable
 
 [generators]
 cmake
