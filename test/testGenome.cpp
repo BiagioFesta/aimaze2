@@ -128,12 +128,11 @@ TEST(TestGenome, AddConnection) {
   Genome genome = Genome::CreateSimpleGenome(::kNumInputs, ::kNumOutputs);
   InnovationHistory innovationHistory(0);
 
-  const auto inputs = genome.getMutableInputNodes().first;
-  const auto outputs = genome.getMutableOutputNodes().first;
+  const auto nodeAID = genome.getMutableInputNodes().first[0].getNodeID();
+  const auto nodeBID = genome.getMutableOutputNodes().first[0].getNodeID();
 
   ASSERT_EQ(genome.getNumConnections(), 0);
-  genome.addConnection(
-      inputs[0].getNodeID(), outputs[0].getNodeID(), 1.f, &innovationHistory);
+  genome.addConnection(nodeAID, nodeBID, 1.f, &innovationHistory);
   ASSERT_EQ(genome.getNumConnections(), 1);
 }
 
@@ -141,17 +140,17 @@ TEST(TestGenome, AddNode) {
   Genome genome = Genome::CreateSimpleGenome(::kNumInputs, ::kNumOutputs);
   InnovationHistory innovationHistory(0);
 
-  const auto inputs = genome.getMutableInputNodes().first;
-  const auto outputs = genome.getMutableOutputNodes().first;
-  genome.addConnection(
-      inputs[0].getNodeID(), outputs[0].getNodeID(), 1.f, &innovationHistory);
+  const auto nodeAID = genome.getMutableInputNodes().first[0].getNodeID();
+  const auto nodeBID = genome.getMutableOutputNodes().first[0].getNodeID();
 
-  auto connections = genome.getMutableConnections();
+  genome.addConnection(nodeAID, nodeBID, 1.f, &innovationHistory);
   ASSERT_EQ(genome.getNumConnections(), 1);
 
   ASSERT_EQ(genome.getTotalNumNodes(), ::kNumTotalNodes);
   ASSERT_EQ(genome.getNumHiddenNodes(), 0);
-  genome.addNode(&connections->front(), &innovationHistory, true);
+
+  genome.addNode(nodeAID, nodeBID, &innovationHistory, true);
+
   ASSERT_EQ(genome.getTotalNumNodes(), ::kNumTotalNodes + 1);
   ASSERT_EQ(genome.getNumHiddenNodes(), 1);
   ASSERT_EQ(genome.getNumConnections(), 4);
@@ -202,8 +201,9 @@ TEST(TestGenome, FeedForwardOneHidden) {
   genome.addConnection(
       inputs[1].getNodeID(), outputs[0].getNodeID(), 2.f, &innovationHistory);
 
-  auto connections = genome.getMutableConnections();
-  genome.addNode(connections->data(), &innovationHistory, false);
+  genome.getMutableConnections();
+  genome.addNode(
+      inputs[0].getNodeID(), outputs[0].getNodeID(), &innovationHistory, false);
 
   genome.feedForward();
   ASSERT_EQ(outputs[0].getPureValue(), 4.5f);

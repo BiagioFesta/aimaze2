@@ -34,6 +34,8 @@ class AIMaze {
   void createAndOpenRender();
   int update();
   bool drawRender();
+
+  void drawDebugGenome();  // TODO(biagio): delete this
 };
 
 }  // namespace aimaze2

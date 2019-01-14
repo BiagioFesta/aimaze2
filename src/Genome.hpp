@@ -45,6 +45,9 @@ class Genome {
   std::pair<GeneNode*, int> getMutableInputNodes() noexcept;
   std::pair<GeneNode*, int> getMutableOutputNodes() noexcept;
   std::vector<GeneNode>* getMutableIONodes() noexcept;
+  std::vector<GeneNode>* getMutableHiddenNodes() noexcept;
+  const std::vector<GeneNode>& getIONodes() const noexcept;
+  const std::vector<GeneNode>& getHiddenNodes() const noexcept;
 
   void feedForward();
 
@@ -56,6 +59,8 @@ class Genome {
 
   int getNumActiveConnections() const noexcept;
 
+  int getNumLayers() const noexcept;
+
   /*! \note Preconditions: The nodes can be linked.
    *  \see canBeLinked
    */
@@ -63,10 +68,6 @@ class Genome {
                      const NodeID iNodeToID,
                      const float iWeight,
                      InnovationHistory* ioInnovationHistory);
-
-  NodeID addNode(GeneConnection* iConnection,
-                 InnovationHistory* ioInnovationHistory,
-                 const bool iAddBias);
 
   NodeID addNode(const NodeID iNodeFromID,
                  const NodeID iNodeToID,
@@ -88,6 +89,8 @@ class Genome {
   bool isConnectionReferBias(const GeneConnection& iConnection);
 
   const GeneNode& getBiasNode() const noexcept;
+
+  const std::vector<GeneConnection>& getConnections() const noexcept;
 
   std::vector<GeneConnection>* getMutableConnections() noexcept;
 
@@ -114,6 +117,10 @@ class Genome {
    */
   void engageNode(GeneNode* ioNode,
                   std::vector<const GeneConnection*>* oIncomeConnections);
+
+  NodeID addNode(GeneConnection* iConnection,
+                 InnovationHistory* ioInnovationHistory,
+                 const bool iAddBias);
 
   GeneConnection* getConnectionAmongNodes(const NodeID iNodeFromID,
                                           const NodeID iNodeToID);

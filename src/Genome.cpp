@@ -151,6 +151,18 @@ std::vector<GeneNode>* Genome::getMutableIONodes() noexcept {
   return &_geneNodesIO;
 }
 
+std::vector<GeneNode>* Genome::getMutableHiddenNodes() noexcept {
+  return &_geneNodesHidden;
+}
+
+const std::vector<GeneNode>& Genome::getIONodes() const noexcept {
+  return _geneNodesIO;
+}
+
+const std::vector<GeneNode>& Genome::getHiddenNodes() const noexcept {
+  return _geneNodesHidden;
+}
+
 void Genome::feedForward() {
   std::sort(_geneNodesHidden.begin(),
             _geneNodesHidden.end(),
@@ -190,6 +202,8 @@ int Genome::getNumActiveConnections() const noexcept {
                                         }));
 }
 
+int Genome::getNumLayers() const noexcept { return _numLayers; }
+
 void Genome::addConnection(const NodeID iNodeFromID,
                            const NodeID iNodeToID,
                            const float iWeight,
@@ -205,38 +219,6 @@ void Genome::addConnection(const NodeID iNodeFromID,
 
   _geneConnections.emplace_back(iNodeFromID, iNodeToID, iWeight, innovationNum);
   assert(isValid());
-}
-
-Genome::NodeID Genome::addNode(GeneConnection* iConnection,
-                               InnovationHistory* ioInnovationHistory,
-                               const bool iAddBias) {
-  assert(!isConnectionReferBias(*iConnection));
-
-  const NodeID prevNodeID = iConnection->getNodeFromID();
-  const NodeID nextNodeID = iConnection->getNodeToID();
-  const LayerID layerNewNode = getGeneNodeByID(prevNodeID)->getLayerID() + 1;
-  const float oldWeight = iConnection->getWeight();
-
-  iConnection->setEnabled(false);
-
-  _geneNodesHidden.emplace_back(
-      NodeType::HIDDEN, _nextNodeId++, layerNewNode, false);
-  const NodeID newNodeID = _geneNodesHidden.back().getNodeID();
-
-  if (layerNewNode > _numLayers - 2) {
-    ++_numLayers;
-  }
-
-  addConnection(prevNodeID, newNodeID, 1.f, ioInnovationHistory);
-  addConnection(newNodeID, nextNodeID, oldWeight, ioInnovationHistory);
-
-  if (iAddBias) {
-    addConnection(
-        getBiasNode().getNodeID(), newNodeID, 0.f, ioInnovationHistory);
-  }
-
-  assert(isValid());
-  return newNodeID;
 }
 
 Genome::NodeID Genome::addNode(const NodeID iNodeFromID,
@@ -284,6 +266,10 @@ bool Genome::isConnectionReferBias(const GeneConnection& iConnection) {
 const GeneNode& Genome::getBiasNode() const noexcept {
   assert(!_geneNodesIO.empty());
   return _geneNodesIO.back();
+}
+
+const std::vector<GeneConnection>& Genome::getConnections() const noexcept {
+  return _geneConnections;
 }
 
 std::vector<GeneConnection>* Genome::getMutableConnections() noexcept {
@@ -347,6 +333,38 @@ Genome Genome::CopyNodeStructureFrom(const Genome& iGenome) {
 
 Genome::Genome(const int numInputs, const int numOutputs)
     : _numInputs(numInputs), _numOutputs(numOutputs) {}
+
+Genome::NodeID Genome::addNode(GeneConnection* iConnection,
+                               InnovationHistory* ioInnovationHistory,
+                               const bool iAddBias) {
+  assert(!isConnectionReferBias(*iConnection));
+
+  const NodeID prevNodeID = iConnection->getNodeFromID();
+  const NodeID nextNodeID = iConnection->getNodeToID();
+  const LayerID layerNewNode = getGeneNodeByID(prevNodeID)->getLayerID() + 1;
+  const float oldWeight = iConnection->getWeight();
+
+  iConnection->setEnabled(false);
+
+  _geneNodesHidden.emplace_back(
+      NodeType::HIDDEN, _nextNodeId++, layerNewNode, false);
+  const NodeID newNodeID = _geneNodesHidden.back().getNodeID();
+
+  if (layerNewNode > _numLayers - 2) {
+    ++_numLayers;
+  }
+
+  addConnection(prevNodeID, newNodeID, 1.f, ioInnovationHistory);
+  addConnection(newNodeID, nextNodeID, oldWeight, ioInnovationHistory);
+
+  if (iAddBias) {
+    addConnection(
+        getBiasNode().getNodeID(), newNodeID, 0.f, ioInnovationHistory);
+  }
+
+  assert(isValid());
+  return newNodeID;
+}
 
 void Genome::engageNode(
     GeneNode* ioNode,

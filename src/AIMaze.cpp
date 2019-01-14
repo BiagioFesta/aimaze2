@@ -17,6 +17,41 @@
 */
 #include "AIMaze.hpp"
 #include "Config.hpp"
+#include "GenomeDrawner.hpp"  // TODO(biagio): delete this line
+
+namespace {
+
+aimaze2::Genome BuildDebugGenome() {  // TODO(biagio): delete this function
+  using aimaze2::Genome;
+  using aimaze2::InnovationHistory;
+
+  InnovationHistory innovationHistory(1);
+
+  Genome genome = Genome::CreateSimpleGenome(3, 1);
+  auto inputs = genome.getMutableInputNodes().first;
+  auto outputs = genome.getMutableOutputNodes().first;
+
+  auto node1 = inputs[0].getNodeID();
+  auto node2 = inputs[1].getNodeID();
+  auto node3 = inputs[2].getNodeID();
+  auto node4 = outputs[0].getNodeID();
+
+  genome.addConnection(node1, node4, 1.f, &innovationHistory);
+  genome.addConnection(node2, node4, 1.f, &innovationHistory);
+  genome.addConnection(node3, node4, 1.f, &innovationHistory);
+
+  auto node5 = genome.addNode(node2, node4, &innovationHistory, true);
+  auto node6 = genome.addNode(node5, node4, &innovationHistory, true);
+
+  innovationHistory.getNextInnovationNumAndIncrement();
+
+  genome.addConnection(node3, node5, 1.f, &innovationHistory);
+  genome.addConnection(node1, node6, 1.f, &innovationHistory);
+
+  return genome;
+}
+
+}  // anonymous namespace
 
 namespace aimaze2 {
 
@@ -31,6 +66,16 @@ void AIMaze::launch() {
     if (_renderWindow.pollEvent(event)) {
       if (event.type == sf::Event::EventType::Closed) {
         keepRunning = false;
+      } else if (event.type == sf::Event::EventType::KeyPressed) {
+        if (event.key.code == sf::Keyboard::Key::Up) {
+          _gameScene.playerJump();
+        } else if (event.key.code == sf::Keyboard::Key::Down) {
+          _gameScene.playerDuckOn();
+        }
+      } else if (event.type == sf::Event::EventType::KeyReleased) {
+        if (event.key.code == sf::Keyboard::Key::Down) {
+          _gameScene.playerDuckOff();
+        }
       }
     }
 
@@ -71,12 +116,23 @@ bool AIMaze::drawRender() {
   if (clockRender.getElapsedTime().asSeconds() >= kPeriodDraw) {
     _renderWindow.clear(Config::kRenderBackgroundColor);
     _gameScene.draw(&_renderWindow);
+    drawDebugGenome();
     _renderWindow.display();
     clockRender.restart();
     return true;
   }
 
   return false;
+}
+
+void AIMaze::drawDebugGenome() {
+  Genome genome = ::BuildDebugGenome();
+
+  GenomeDrawner drawner;
+  drawner.init();
+  drawner.updateWithGenome(genome);
+
+  drawner.draw(&_renderWindow);
 }
 
 }  // namespace aimaze2
