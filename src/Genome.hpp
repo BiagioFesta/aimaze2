@@ -20,6 +20,7 @@
 #include <limits>
 #include <utility>
 #include <vector>
+#include "ConfigEvolution.hpp"
 #include "GeneConnection.hpp"
 #include "GeneNode.hpp"
 #include "InnovationHistory.hpp"
@@ -37,9 +38,13 @@ class Genome {
 
   static Genome CreateSimpleGenome(const int numInputs, const int numOutputs);
 
-  std::vector<GeneNode>* getMutableNodes() noexcept;
+  static Genome Crossover(Genome* iGenomeA,
+                          Genome* iGenomeB,
+                          ConfigEvolution::RndEngine* iRndEngine);
+
   std::pair<GeneNode*, int> getMutableInputNodes() noexcept;
   std::pair<GeneNode*, int> getMutableOutputNodes() noexcept;
+  std::vector<GeneNode>* getMutableIONodes() noexcept;
 
   void feedForward();
 
@@ -54,38 +59,41 @@ class Genome {
   /*! \note Preconditions: The nodes can be linked.
    *  \see canBeLinked
    */
-  void addConnection(const GeneNode& iNodeFrom,
-                     const GeneNode& iNodeTo,
+  void addConnection(const NodeID iNodeFromID,
+                     const NodeID iNodeToID,
                      const float iWeight,
                      InnovationHistory* ioInnovationHistory);
 
-  void addNode(GeneConnection* iConnection,
-               InnovationHistory* ioInnovationHistory);
+  NodeID addNode(GeneConnection* iConnection,
+                 InnovationHistory* ioInnovationHistory,
+                 const bool iAddBias);
+
+  NodeID addNode(const NodeID iNodeFromID,
+                 const NodeID iNodeToID,
+                 InnovationHistory* ioInnovationHistory,
+                 const bool iAddBias);
 
   /*! \brief Checks whether two nodes can be linked or not.
    *  \note That is:
    *        - nodeFrom.layer < nodeTo.layer.
    *        - there are not already linked.
    */
-  bool canBeLinked(const GeneNode& iNodeFrom, const GeneNode& iNodeTo) const;
+  bool canBeLinked(const NodeID iNodeFromID, const NodeID iNodeToID) const;
 
   /*! \brief Checkes whethere two nodes are linked or not.
    *  \note This method takes into account the 'connection's direction'!
    */
-  bool areAlreadyLinked(const GeneNode& iNodeFrom,
-                        const GeneNode& iNodeTo) const;
+  bool areAlreadyLinked(const NodeID iNodeFromID, const NodeID iNodeToID) const;
 
   bool isConnectionReferBias(const GeneConnection& iConnection);
-
-  void computeIncomeConnections(
-      const GeneNode& iNode,
-      std::vector<const GeneConnection*>* oIncomeConnections) const;
-
-  const GeneNode* getGeneNodeByID(const NodeID iNodeID) const;
 
   const GeneNode& getBiasNode() const noexcept;
 
   std::vector<GeneConnection>* getMutableConnections() noexcept;
+
+  void sortConnectionsByInnovationNum();
+
+  bool isValid() const;
 
  private:
   NodeID _nextNodeId = 0;
@@ -96,6 +104,9 @@ class Genome {
   std::vector<GeneNode> _geneNodesHidden;
   std::vector<GeneConnection> _geneConnections;
 
+  static Genome CopyNodeStructureFrom(const Genome& iGenome);
+
+  Genome() = default;
   Genome(const int numInputs, const int numOutputs);
 
   /*! \param [out] oIncomeConnections   Just a temporary vector for computing
@@ -103,6 +114,15 @@ class Genome {
    */
   void engageNode(GeneNode* ioNode,
                   std::vector<const GeneConnection*>* oIncomeConnections);
+
+  GeneConnection* getConnectionAmongNodes(const NodeID iNodeFromID,
+                                          const NodeID iNodeToID);
+
+  const GeneNode* getGeneNodeByID(const NodeID iNodeID) const;
+
+  void computeIncomeConnections(
+      const GeneNode& iNode,
+      std::vector<const GeneConnection*>* oIncomeConnections) const;
 };
 
 }  // namespace aimaze2

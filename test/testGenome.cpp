@@ -25,6 +25,69 @@ constexpr int kNumInputs = 3;
 constexpr int kNumOutputs = 2;
 constexpr int kNumBias = 1;
 constexpr int kNumTotalNodes = kNumInputs + kNumOutputs + kNumBias;
+constexpr int kNumInputsCross = 3;
+constexpr int kNumOutputsCross = 1;
+
+aimaze2::Genome BuildGenomeA() {
+  using aimaze2::Genome;
+  using aimaze2::InnovationHistory;
+
+  InnovationHistory innovationHistory(1);
+
+  Genome genome =
+      Genome::CreateSimpleGenome(::kNumInputsCross, ::kNumOutputsCross);
+  auto inputs = genome.getMutableInputNodes().first;
+  auto outputs = genome.getMutableOutputNodes().first;
+
+  auto node1 = inputs[0].getNodeID();
+  auto node2 = inputs[1].getNodeID();
+  auto node3 = inputs[2].getNodeID();
+  auto node4 = outputs[0].getNodeID();
+
+  genome.addConnection(node1, node4, 1.f, &innovationHistory);
+  genome.addConnection(node2, node4, 1.f, &innovationHistory);
+  genome.addConnection(node3, node4, 1.f, &innovationHistory);
+
+  auto node5 = genome.addNode(node2, node4, &innovationHistory, false);
+  auto node6 = genome.addNode(node5, node4, &innovationHistory, false);
+
+  innovationHistory.getNextInnovationNumAndIncrement();
+
+  genome.addConnection(node3, node5, 1.f, &innovationHistory);
+  genome.addConnection(node1, node6, 1.f, &innovationHistory);
+
+  return genome;
+}
+
+aimaze2::Genome BuildGenomeB() {
+  using aimaze2::Genome;
+  using aimaze2::InnovationHistory;
+
+  InnovationHistory innovationHistory(1);
+
+  Genome genome =
+      Genome::CreateSimpleGenome(::kNumInputsCross, ::kNumOutputsCross);
+  auto inputs = genome.getMutableInputNodes().first;
+  auto outputs = genome.getMutableOutputNodes().first;
+
+  auto node1 = inputs[0].getNodeID();
+  auto node2 = inputs[1].getNodeID();
+  auto node3 = inputs[2].getNodeID();
+  auto node4 = outputs[0].getNodeID();
+
+  genome.addConnection(node1, node4, 1.f, &innovationHistory);
+  genome.addConnection(node2, node4, 1.f, &innovationHistory);
+  genome.addConnection(node3, node4, 1.f, &innovationHistory);
+
+  auto node5 = genome.addNode(node2, node4, &innovationHistory, false);
+
+  innovationHistory.getNextInnovationNumAndIncrement();
+  innovationHistory.getNextInnovationNumAndIncrement();
+
+  genome.addConnection(node1, node5, 1.f, &innovationHistory);
+
+  return genome;
+}
 
 }  // anonymous namespace
 
@@ -41,7 +104,7 @@ TEST(TestGenome, CreateSimpleGenome) {
   ASSERT_EQ(inputs.second, ::kNumInputs);
   ASSERT_EQ(outputs.second, ::kNumOutputs);
 
-  const auto nodes = genome.getMutableNodes();
+  const auto nodes = genome.getMutableIONodes();
   GeneNode* ptrGene = inputs.first;
 
   int i = 0;
@@ -69,7 +132,8 @@ TEST(TestGenome, AddConnection) {
   const auto outputs = genome.getMutableOutputNodes().first;
 
   ASSERT_EQ(genome.getNumConnections(), 0);
-  genome.addConnection(inputs[0], outputs[0], 1.f, &innovationHistory);
+  genome.addConnection(
+      inputs[0].getNodeID(), outputs[0].getNodeID(), 1.f, &innovationHistory);
   ASSERT_EQ(genome.getNumConnections(), 1);
 }
 
@@ -79,14 +143,15 @@ TEST(TestGenome, AddNode) {
 
   const auto inputs = genome.getMutableInputNodes().first;
   const auto outputs = genome.getMutableOutputNodes().first;
-  genome.addConnection(inputs[0], outputs[0], 1.f, &innovationHistory);
+  genome.addConnection(
+      inputs[0].getNodeID(), outputs[0].getNodeID(), 1.f, &innovationHistory);
 
   auto connections = genome.getMutableConnections();
   ASSERT_EQ(genome.getNumConnections(), 1);
 
   ASSERT_EQ(genome.getTotalNumNodes(), ::kNumTotalNodes);
   ASSERT_EQ(genome.getNumHiddenNodes(), 0);
-  genome.addNode(&connections->front(), &innovationHistory);
+  genome.addNode(&connections->front(), &innovationHistory, true);
   ASSERT_EQ(genome.getTotalNumNodes(), ::kNumTotalNodes + 1);
   ASSERT_EQ(genome.getNumHiddenNodes(), 1);
   ASSERT_EQ(genome.getNumConnections(), 4);
@@ -107,13 +172,15 @@ TEST(TestGenome, FeedForwardOnlyIO) {
   inputs[0].setValue(10.f);
   inputs[1].setValue(2.f);
 
-  genome.addConnection(inputs[0], outputs[0], 0.5f, &innovationHistory);
+  genome.addConnection(
+      inputs[0].getNodeID(), outputs[0].getNodeID(), 0.5f, &innovationHistory);
 
   genome.feedForward();
   ASSERT_EQ(outputs[0].getPureValue(), 5.f);
   ASSERT_EQ(outputs[1].getPureValue(), 0.f);
 
-  genome.addConnection(inputs[1], outputs[0], 2.f, &innovationHistory);
+  genome.addConnection(
+      inputs[1].getNodeID(), outputs[0].getNodeID(), 2.f, &innovationHistory);
 
   genome.feedForward();
   ASSERT_EQ(outputs[0].getPureValue(), 9.f);
@@ -130,15 +197,26 @@ TEST(TestGenome, FeedForwardOneHidden) {
   inputs[0].setValue(10.f);
   inputs[1].setValue(2.f);
 
-  genome.addConnection(inputs[0], outputs[0], 0.5f, &innovationHistory);
-  genome.addConnection(inputs[1], outputs[0], 2.f, &innovationHistory);
+  genome.addConnection(
+      inputs[0].getNodeID(), outputs[0].getNodeID(), 0.5f, &innovationHistory);
+  genome.addConnection(
+      inputs[1].getNodeID(), outputs[0].getNodeID(), 2.f, &innovationHistory);
 
   auto connections = genome.getMutableConnections();
-  genome.addNode(connections->data(), &innovationHistory);
+  genome.addNode(connections->data(), &innovationHistory, false);
 
   genome.feedForward();
   ASSERT_EQ(outputs[0].getPureValue(), 4.5f);
   ASSERT_EQ(outputs[1].getPureValue(), 0.f);
+}
+
+TEST(TestGenome, Crossover) {
+  ConfigEvolution::RndEngine rndEngine;
+
+  Genome genomeA = ::BuildGenomeA();
+  Genome genomeB = ::BuildGenomeB();
+
+  Genome::Crossover(&genomeA, &genomeB, &rndEngine);
 }
 
 }  // namespace aimaze2::testing
