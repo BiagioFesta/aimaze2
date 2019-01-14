@@ -21,6 +21,7 @@
 #include <cmath>
 #include <limits>
 #include <random>
+#include <set>
 #include <utility>
 #include <vector>
 
@@ -66,6 +67,7 @@ Genome Genome::CreateSimpleGenome(const int numInputs, const int numOutputs) {
 
   genome._numLayers = 2;
 
+  assert(genome.isValid());
   return genome;
 }
 
@@ -202,6 +204,7 @@ void Genome::addConnection(const NodeID iNodeFromID,
   }
 
   _geneConnections.emplace_back(iNodeFromID, iNodeToID, iWeight, innovationNum);
+  assert(isValid());
 }
 
 Genome::NodeID Genome::addNode(GeneConnection* iConnection,
@@ -220,6 +223,10 @@ Genome::NodeID Genome::addNode(GeneConnection* iConnection,
       NodeType::HIDDEN, _nextNodeId++, layerNewNode, false);
   const NodeID newNodeID = _geneNodesHidden.back().getNodeID();
 
+  if (layerNewNode > _numLayers - 2) {
+    ++_numLayers;
+  }
+
   addConnection(prevNodeID, newNodeID, 1.f, ioInnovationHistory);
   addConnection(newNodeID, nextNodeID, oldWeight, ioInnovationHistory);
 
@@ -228,6 +235,7 @@ Genome::NodeID Genome::addNode(GeneConnection* iConnection,
         getBiasNode().getNodeID(), newNodeID, 0.f, ioInnovationHistory);
   }
 
+  assert(isValid());
   return newNodeID;
 }
 
@@ -301,36 +309,24 @@ bool Genome::isValid() const {
     return false;
   }
 
-  for (const auto& node : _geneNodesIO) {
-    if (node.getNodeType() != GeneNode::NodeType::INPUT &&
-        node.getNodeType() != GeneNode::NodeType::OUTPUT) {
-      return false;
-    }
-    if (node.getLayerID() != kIDLayerInputs &&
-        node.getLayerID() != kIDLayerOutpus) {
-      return false;
-    }
+  if (!areIONodesValidType()) {
+    return false;
   }
 
-  for (const auto& node : _geneNodesHidden) {
-    if (node.getNodeType() != GeneNode::NodeType::HIDDEN) {
-      return false;
-    }
+  if (!areHiddenNodesValidType()) {
+    return false;
   }
 
-  for (const auto& connection : _geneConnections) {
-    const NodeID nodeFromID = connection.getNodeFromID();
-    const NodeID nodeToID = connection.getNodeToID();
-    const GeneNode* nodeFrom = getGeneNodeByID(nodeFromID);
-    const GeneNode* nodeTo = getGeneNodeByID(nodeToID);
-    if (!nodeFrom || !nodeTo) {
-      return false;
-    }
-    assert(areAlreadyLinked(nodeFromID, nodeToID));
+  if (!areConnectionsValid()) {
+    return false;
+  }
 
-    if (nodeTo->getLayerID() <= nodeFrom->getLayerID()) {
-      return false;
-    }
+  if (!isNumLayersValid()) {
+    return false;
+  }
+
+  if (areSameInnovationNumberInConnections()) {
+    return false;
   }
 
   return true;
@@ -415,6 +411,65 @@ void Genome::computeIncomeConnections(
       oIncomeConnections->push_back(&connection);
     }
   }
+}
+
+bool Genome::areIONodesValidType() const {
+  for (const auto& node : _geneNodesIO) {
+    if (node.getNodeType() != GeneNode::NodeType::INPUT &&
+        node.getNodeType() != GeneNode::NodeType::OUTPUT) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool Genome::areHiddenNodesValidType() const {
+  for (const auto& node : _geneNodesHidden) {
+    if (node.getNodeType() != GeneNode::NodeType::HIDDEN) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool Genome::areConnectionsValid() const {
+  for (const auto& connection : _geneConnections) {
+    const NodeID nodeFromID = connection.getNodeFromID();
+    const NodeID nodeToID = connection.getNodeToID();
+    const GeneNode* nodeFrom = getGeneNodeByID(nodeFromID);
+    const GeneNode* nodeTo = getGeneNodeByID(nodeToID);
+
+    if (!nodeFrom || !nodeTo) {
+      return false;
+    }
+    assert(areAlreadyLinked(nodeFromID, nodeToID));
+
+    if (nodeTo->getLayerID() <= nodeFrom->getLayerID()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool Genome::isNumLayersValid() const {
+  auto itMax =
+      std::max_element(_geneNodesHidden.cbegin(),
+                       _geneNodesHidden.cend(),
+                       [](const GeneNode& iNodeA, const GeneNode& iNodeB) {
+                         return iNodeA.getLayerID() < iNodeB.getLayerID();
+                       });
+  const int expectedNumLayers =
+      2 + (itMax != _geneNodesHidden.cend() ? itMax->getLayerID() : 0);
+  return _numLayers == expectedNumLayers;
+}
+
+bool Genome::areSameInnovationNumberInConnections() const {
+  std::set<InnovationNum> visitedInnovationNums;
+  for (const auto& connection : _geneConnections) {
+    visitedInnovationNums.insert(connection.getInnovationNum());
+  }
+
+  return visitedInnovationNums.size() != _geneConnections.size();
 }
 
 }  // namespace aimaze2

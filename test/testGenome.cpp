@@ -216,7 +216,7 @@ TEST(TestGenome, Crossover) {
   Genome genomeA = ::BuildGenomeA();
   Genome genomeB = ::BuildGenomeB();
 
-  Genome::Crossover(&genomeA, &genomeB, &rndEngine);
+  Genome child = Genome::Crossover(&genomeA, &genomeB, &rndEngine);
 }
 
 }  // namespace aimaze2::testing

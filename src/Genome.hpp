@@ -123,6 +123,12 @@ class Genome {
   void computeIncomeConnections(
       const GeneNode& iNode,
       std::vector<const GeneConnection*>* oIncomeConnections) const;
+
+  bool areIONodesValidType() const;
+  bool areHiddenNodesValidType() const;
+  bool areConnectionsValid() const;
+  bool isNumLayersValid() const;
+  bool areSameInnovationNumberInConnections() const;
 };
 
 }  // namespace aimaze2
