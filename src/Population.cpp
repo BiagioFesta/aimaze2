@@ -15,38 +15,21 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-#ifndef AIMAZE2__AIMAZE__HPP
-#define AIMAZE2__AIMAZE__HPP
-#include <SFML/Graphics.hpp>
-#include "GameScene.hpp"
 #include "Population.hpp"
+#include <cassert>
 
 namespace aimaze2 {
 
-class AIMaze {
- public:
-  void launch();
+void Population::init(const std::size_t iSizePopulation,
+                      const int iNumInputs,
+                      const int iNumOutpus) {
+  _genomes.resize(iSizePopulation,
+                  Genome::CreateSimpleGenome(iNumInputs, iNumOutpus));
+}
 
- private:
-  static constexpr int kNumInputs = 5;
-  static constexpr int kNumOuputs = 2;
-  static constexpr std::size_t kSizePopulation = 2;
-
-  sf::RenderWindow _renderWindow;
-  Config::RndEngine _rndEngine;  // TODO(biagio): has to be initialized
-  GameScene _gameScene;
-  Population _population;
-
-  void createAndOpenRender();
-  int update();
-  bool drawRender();
-
-  void setInputsAndFeedPopulation();
-  void applyActionPopulation();
-
-  void drawDebugGenome();  // TODO(biagio): delete this
-};
+Genome* Population::getMutableGenome(const std::size_t iIndexGenome) noexcept {
+  assert(iIndexGenome < _genomes.size());
+  return &(_genomes[iIndexGenome]);
+}
 
 }  // namespace aimaze2
-
-#endif  // AIMAZE2__AIMAZE__HPP

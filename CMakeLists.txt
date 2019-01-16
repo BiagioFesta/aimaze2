@@ -21,7 +21,8 @@ add_executable(${PROJECT_NAME}
   ${PROJECT_SOURCE_DIR}/src/GeneNode.cpp
   ${PROJECT_SOURCE_DIR}/src/GeneConnection.cpp
   ${PROJECT_SOURCE_DIR}/src/InnovationHistory.cpp
-  ${PROJECT_SOURCE_DIR}/src/GenomeDrawner.cpp)
+  ${PROJECT_SOURCE_DIR}/src/GenomeDrawner.cpp
+  ${PROJECT_SOURCE_DIR}/src/Population.cpp)
 target_link_libraries(${PROJECT_NAME} sfml-graphics sfml-window sfml-system)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 

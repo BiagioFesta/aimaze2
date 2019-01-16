@@ -16,6 +16,7 @@
 
 */
 #include "AIMaze.hpp"
+#include <cassert>
 #include <iostream>  // TODO(biagio): delete this line as well
 #include "Config.hpp"
 #include "GenomeDrawner.hpp"  // TODO(biagio): delete this line
@@ -59,6 +60,7 @@ namespace aimaze2 {
 void AIMaze::launch() {
   createAndOpenRender();
   _gameScene.init(2, &_rndEngine);
+  _population.init(kSizePopulation, kNumInputs, kNumOuputs);
 
   sf::Event event;
 
@@ -67,18 +69,6 @@ void AIMaze::launch() {
     if (_renderWindow.pollEvent(event)) {
       if (event.type == sf::Event::EventType::Closed) {
         keepRunning = false;
-      } else if (event.type == sf::Event::EventType::KeyPressed) {
-        if (event.key.code == sf::Keyboard::Key::Up) {
-          _gameScene.playerJump(0);
-        } else if (event.key.code == sf::Keyboard::Key::Down) {
-          _gameScene.playerDuckOn(0);
-        } else if (event.key.code == sf::Keyboard::Key::Space) {
-          _gameScene.playerJump(1);
-        }
-      } else if (event.type == sf::Event::EventType::KeyReleased) {
-        if (event.key.code == sf::Keyboard::Key::Down) {
-          _gameScene.playerDuckOff(0);
-        }
       }
     }
 
@@ -104,6 +94,8 @@ int AIMaze::update() {
   accumulator += clockUpdate.restart().asSeconds();
   while (accumulator >= Config::kDeltaTimeLogicUpdate) {
     _gameScene.update(&_rndEngine);
+    setInputsAndFeedPopulation();
+    applyActionPopulation();
     ++numFrame;
     accumulator -= Config::kDeltaTimeLogicUpdate;
   }
@@ -128,6 +120,44 @@ bool AIMaze::drawRender() {
   }
 
   return false;
+}
+
+void AIMaze::setInputsAndFeedPopulation() {
+  const float gameVelocity = _gameScene.getGameVelocity();
+  const auto& nextObstacleProperty = _gameScene.getNextObstacleProperty();
+
+  for (std::size_t i = 0; i < kSizePopulation; ++i) {
+    auto refGenome = _population.getMutableGenome(i);
+    auto inputNodes = refGenome->getMutableInputNodes();
+    assert(inputNodes.second == kNumInputs);
+    inputNodes.first[0].setValue(gameVelocity);
+    inputNodes.first[1].setValue(nextObstacleProperty._distance);
+    inputNodes.first[2].setValue(nextObstacleProperty._width);
+    inputNodes.first[3].setValue(nextObstacleProperty._height);
+    inputNodes.first[4].setValue(nextObstacleProperty._altitude);
+
+    refGenome->feedForward();
+  }
+}
+
+void AIMaze::applyActionPopulation() {
+  for (std::size_t i = 0; i < kSizePopulation; ++i) {
+    auto refGenome = _population.getMutableGenome(i);
+    auto outputNodes = refGenome->getMutableOutputNodes();
+    assert(outputNodes.second == kNumOuputs);
+
+    const float jump = outputNodes.first[0].getValueWithActivation();
+    const float duck = outputNodes.first[1].getValueWithActivation();
+
+    if (duck > 0.5) {
+      _gameScene.playerDuckOn(i);
+    } else {
+      _gameScene.playerDuckOff(i);
+      if (jump > 0.5) {
+        _gameScene.playerJump(i);
+      }
+    }
+  }
 }
 
 void AIMaze::drawDebugGenome() {
