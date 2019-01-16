@@ -219,4 +219,11 @@ TEST(TestGenome, Crossover) {
   Genome child = Genome::Crossover(&genomeA, &genomeB, &rndEngine);
 }
 
+TEST(TestGenome, SameSpecie) {
+  Genome genomeA = ::BuildGenomeA();
+  Genome genomeAcopy = ::BuildGenomeA();
+
+  ASSERT_TRUE(genomeA.isSameSpecie(genomeAcopy));
+}
+
 }  // namespace aimaze2::testing

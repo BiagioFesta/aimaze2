@@ -318,6 +318,72 @@ bool Genome::isValid() const {
   return true;
 }
 
+bool Genome::isSameSpecie(const Genome& iGenome) const {
+  const float similarity = computeSimilaritySpecie(*this, iGenome);
+  return similarity < ConfigEvolution::kThresholdSpeciate;
+}
+
+float Genome::computeSimilaritySpecie(const Genome& iGenomeA,
+                                      const Genome& iGenomeB) {
+  int numDisjoint = 0;
+  int numExcess = 0;
+  int numMatching = 0;
+  float totalDifference = 0.f;
+
+  auto itConA = iGenomeA._geneConnections.cbegin();
+  auto itConB = iGenomeB._geneConnections.cbegin();
+  const auto itConAEnd = iGenomeA._geneConnections.cend();
+  const auto itConBEnd = iGenomeB._geneConnections.cend();
+
+  while (itConA != itConAEnd || itConB != itConBEnd) {
+    if (itConA == itConAEnd) {
+      // A is end
+      ++numExcess;
+      ++itConB;
+    } else if (itConB == itConBEnd) {
+      // B is end
+      ++numExcess;
+      ++itConA;
+    } else {
+      if (itConA->getInnovationNum() == itConB->getInnovationNum()) {
+        // same innovation number
+        ++numMatching;
+        ++itConA;
+        ++itConB;
+        totalDifference += std::abs(itConA->getWeight() - itConB->getWeight());
+      } else if (itConA->getInnovationNum() < itConB->getInnovationNum()) {
+        // A is smaller
+        ++numDisjoint;
+        ++itConA;
+      } else {
+        // B is smaller
+        ++numDisjoint;
+        ++itConB;
+      }
+    }
+  }  // until all connection have been evaluated
+
+  float diffWeights = totalDifference;
+  if (numMatching) {
+    diffWeights /= static_cast<float>(numMatching);
+  }
+
+  const auto largeGenome =
+      std::max(iGenomeA.getNumConnections(), iGenomeB.getNumConnections());
+  const float largeGenomeNormalized =
+      largeGenome < ConfigEvolution::kNormalizeSizeGene
+          ? 1.f
+          : static_cast<float>(largeGenome);
+
+  const float t1 = ConfigEvolution::kExcessCoefficient *
+                   static_cast<float>(numExcess) / largeGenomeNormalized;
+  const float t2 = ConfigEvolution::kDisjointCoefficient *
+                   static_cast<float>(numDisjoint) / largeGenomeNormalized;
+  const float t3 = ConfigEvolution::kWeightsCoefficient * diffWeights;
+
+  return t1 + t2 + t3;
+}
+
 Genome Genome::CopyNodeStructureFrom(const Genome& iGenome) {
   Genome copy;
   copy._nextNodeId = iGenome._nextNodeId;

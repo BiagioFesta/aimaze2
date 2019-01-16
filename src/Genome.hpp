@@ -98,6 +98,8 @@ class Genome {
 
   bool isValid() const;
 
+  bool isSameSpecie(const Genome& iGenome) const;
+
  private:
   NodeID _nextNodeId = 0;
   int _numLayers = 0;
@@ -136,6 +138,9 @@ class Genome {
   bool areConnectionsValid() const;
   bool isNumLayersValid() const;
   bool areSameInnovationNumberInConnections() const;
+
+  static float computeSimilaritySpecie(const Genome& iGenomeA,
+                                       const Genome& iGenomeB);
 };
 
 }  // namespace aimaze2

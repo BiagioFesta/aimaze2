@@ -26,6 +26,11 @@ class ConfigEvolution {
   using RndEngine = std::mt19937_64;
 
   static constexpr float kProbDisableCross = 0.75;
+  static constexpr float kExcessCoefficient = 1.f;
+  static constexpr float kDisjointCoefficient = 1.0f;
+  static constexpr float kWeightsCoefficient = 3.f;
+  static constexpr int kNormalizeSizeGene = 20;
+  static constexpr float kThresholdSpeciate = 3.0f;
 };
 
 }  // namespace aimaze2
