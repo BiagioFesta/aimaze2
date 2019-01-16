@@ -31,7 +31,7 @@ class Player {
   void draw(sf::RenderWindow* oRender) const;
 
   void jump();
-  void die();
+  void die(const sf::Vector2f& iNewPosition);
   void duckOn();
   void duckOff();
 
@@ -49,6 +49,7 @@ class Player {
   bool _ducking;
   float _velocityY;
   float _gravity;
+  float _accumulatorAnimation;
 
   void applyGravity();
   void updateAnimation(const float iGameVelocity);

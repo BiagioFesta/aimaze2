@@ -57,7 +57,7 @@ namespace aimaze2 {
 
 void AIMaze::launch() {
   createAndOpenRender();
-  _gameScene.init(&_rndEngine);
+  _gameScene.init(2, &_rndEngine);
 
   sf::Event event;
 
@@ -68,13 +68,15 @@ void AIMaze::launch() {
         keepRunning = false;
       } else if (event.type == sf::Event::EventType::KeyPressed) {
         if (event.key.code == sf::Keyboard::Key::Up) {
-          _gameScene.playerJump();
+          _gameScene.playerJump(0);
         } else if (event.key.code == sf::Keyboard::Key::Down) {
-          _gameScene.playerDuckOn();
+          _gameScene.playerDuckOn(0);
+        } else if (event.key.code == sf::Keyboard::Key::Space) {
+          _gameScene.playerJump(1);
         }
       } else if (event.type == sf::Event::EventType::KeyReleased) {
         if (event.key.code == sf::Keyboard::Key::Down) {
-          _gameScene.playerDuckOff();
+          _gameScene.playerDuckOff(0);
         }
       }
     }

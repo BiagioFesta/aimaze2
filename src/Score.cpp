@@ -42,6 +42,8 @@ void Score::update(const float iGameVelocity) {
 
 void Score::draw(sf::RenderWindow* oRender) const { oRender->draw(_scoreText); }
 
+long long Score::getValue() const noexcept { return _score; }
+
 void Score::updateScoreValue(const float iGameVelocity) {
   static constexpr float kScale = 35.f;
   static float accumulator = 0.0f;

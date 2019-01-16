@@ -37,6 +37,8 @@ void Player::init() {
   _ducking = false;
   _velocityY = 0.f;
   _gravity = 0.f;
+
+  _accumulatorAnimation = 0.f;
 }
 
 void Player::update(const float iGameVelocity) {
@@ -68,10 +70,11 @@ void Player::jump() {
   }
 }
 
-void Player::die() {
+void Player::die(const sf::Vector2f& iNewPosition) {
   _dead = true;
   _jumping = false;
   duckOff();
+  _playerSprite.setPosition(iNewPosition);
 }
 
 void Player::duckOn() {
@@ -109,7 +112,6 @@ void Player::applyGravity() {
 
 void Player::updateAnimation(const float iGameVelocity) {
   static constexpr float kScaleVelocityAnimation = 80.f;
-  static float accumulator = 0.f;
 
   if (_dead == true) {
     _idTexture = TextureID::DEAD;
@@ -128,16 +130,16 @@ void Player::updateAnimation(const float iGameVelocity) {
 
   const float timePerFrame = kScaleVelocityAnimation / iGameVelocity;
 
-  if (timePerFrame <= accumulator) {
+  if (timePerFrame <= _accumulatorAnimation) {
     _idTexture = NextFrameAnimation(_idTexture);
-    accumulator -= timePerFrame;
+    _accumulatorAnimation -= timePerFrame;
   }
 
-  accumulator += Config::kDeltaTimeLogicUpdate;
+  _accumulatorAnimation += Config::kDeltaTimeLogicUpdate;
 }
 
 void Player::drawCollisionBox(sf::RenderWindow* oRender) const {
-  static sf::RectangleShape box;
+  sf::RectangleShape box;
 
   const auto collisionBox = getCollisionBox();
   box.setSize(sf::Vector2f{collisionBox.width, collisionBox.height});

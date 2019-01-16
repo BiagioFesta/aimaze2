@@ -18,6 +18,8 @@
 #ifndef AIMAZE2__GAME_SCENE__HPP
 #define AIMAZE2__GAME_SCENE__HPP
 #include <SFML/Graphics.hpp>
+#include <utility>
+#include <vector>
 #include "CollisionManager.hpp"
 #include "Ground.hpp"
 #include "ObstacleManager.hpp"
@@ -29,27 +31,34 @@ namespace aimaze2 {
 class GameScene {
  public:
   enum class SceneState { RUNNING, DEAD };
+  enum class PlayerStatus { RUNNING, DEAD };
+  static inline const sf::Vector2f kPositionPlayerDead{0.f, 0.f};
 
-  void init(Config::RndEngine* iRndEngine);
+  void init(const std::size_t iNumPlayers, Config::RndEngine* iRndEngine);
   void update(Config::RndEngine* iRndEngine);
   void draw(sf::RenderWindow* oRender) const;
 
-  void playerJump();
-  void playerDuckOn();
-  void playerDuckOff();
+  void playerJump(const std::size_t iIndexPlayer);
+  void playerDuckOn(const std::size_t iIndexPlayer);
+  void playerDuckOff(const std::size_t iIndexPlayer);
+
+  bool arePlayersAllDead() const noexcept;
 
  private:
   static constexpr float kInitialGameVelocity = 400.f;
+  static constexpr float kOffsetDeadPosition = 10.f;
 
   void updateGameVelocity();
 
   float _gameVelocity;
   Ground _ground;
-  Player _player;
+  std::vector<std::pair<PlayerStatus, Player>> _players;
+  std::vector<float> _playerScores;
   Score _score;
   ObstacleManager _obstacleManager;
   CollisionManager _collisionManager;
   SceneState _sceneState;
+  std::size_t _numPlayersDead;
 };
 
 }  // namespace aimaze2

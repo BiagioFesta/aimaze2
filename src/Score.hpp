@@ -27,6 +27,8 @@ class Score {
   void update(const float iGameVelocity);
   void draw(sf::RenderWindow* oRender) const;
 
+  long long getValue() const noexcept;
+
  private:
   static constexpr float kVerticalOffsetSprite = 20.f;
   static constexpr float kHorizontalOffsetSprite = 50.f;
