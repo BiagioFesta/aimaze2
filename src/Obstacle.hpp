@@ -45,6 +45,8 @@ class Obstacle {
 
   sf::FloatRect getCollisionBox() const;
 
+  const sf::Vector2f& getPosition() const noexcept;
+
  private:
   enum TextureID : std::size_t {
     CACTUS_SMALL,

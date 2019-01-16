@@ -16,6 +16,7 @@
 
 */
 #include "AIMaze.hpp"
+#include <iostream>  // TODO(biagio): delete this line as well
 #include "Config.hpp"
 #include "GenomeDrawner.hpp"  // TODO(biagio): delete this line
 
@@ -117,8 +118,10 @@ bool AIMaze::drawRender() {
 
   if (clockRender.getElapsedTime().asSeconds() >= kPeriodDraw) {
     _renderWindow.clear(Config::kRenderBackgroundColor);
+
     _gameScene.draw(&_renderWindow);
     drawDebugGenome();
+
     _renderWindow.display();
     clockRender.restart();
     return true;

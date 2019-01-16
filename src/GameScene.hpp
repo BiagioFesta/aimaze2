@@ -30,9 +30,21 @@ namespace aimaze2 {
 
 class GameScene {
  public:
-  enum class SceneState { RUNNING, DEAD };
+  enum class SceneState { RUNNING, STOP };
   enum class PlayerStatus { RUNNING, DEAD };
   static inline const sf::Vector2f kPositionPlayerDead{0.f, 0.f};
+
+  struct ObstacleProperty {
+    float _distance;
+    float _height;
+    float _width;
+    float _altitude;
+
+    ObstacleProperty() = default;
+    ObstacleProperty(const float iDistance,
+                     const float iHeight,
+                     const float iAltitude) noexcept;
+  };
 
   void init(const std::size_t iNumPlayers, Config::RndEngine* iRndEngine);
   void update(Config::RndEngine* iRndEngine);
@@ -44,11 +56,16 @@ class GameScene {
 
   bool arePlayersAllDead() const noexcept;
 
+  const ObstacleProperty& getNextObstacleProperty() const noexcept;
+  float getGameVelocity() const noexcept;
+
  private:
   static constexpr float kInitialGameVelocity = 400.f;
   static constexpr float kOffsetDeadPosition = 10.f;
 
-  void updateGameVelocity();
+  void updateGameVelocity() noexcept;
+
+  void computePropertyNextObstacle() noexcept;
 
   float _gameVelocity;
   Ground _ground;
@@ -59,6 +76,7 @@ class GameScene {
   CollisionManager _collisionManager;
   SceneState _sceneState;
   std::size_t _numPlayersDead;
+  ObstacleProperty _obstacleProperty;
 };
 
 }  // namespace aimaze2

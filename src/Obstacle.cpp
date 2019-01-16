@@ -97,6 +97,10 @@ sf::FloatRect Obstacle::getCollisionBox() const {
   return box;
 }
 
+const sf::Vector2f& Obstacle::getPosition() const noexcept {
+  return _sprite.getPosition();
+}
+
 void Obstacle::drawCollisionBox(sf::RenderWindow* oRender) const {
   static sf::RectangleShape box;
 

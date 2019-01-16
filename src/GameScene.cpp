@@ -37,6 +37,8 @@ void GameScene::init(const std::size_t iNumPlayers,
 
   _sceneState = SceneState::RUNNING;
   _numPlayersDead = 0;
+
+  computePropertyNextObstacle();
 }
 
 void GameScene::update(Config::RndEngine* iRndEngine) {
@@ -70,6 +72,11 @@ void GameScene::update(Config::RndEngine* iRndEngine) {
       }
     }
 
+    computePropertyNextObstacle();
+
+    if (arePlayersAllDead()) {
+      _sceneState = SceneState::STOP;
+    }
     // TODO(biagio): partition dead
   }
 }
@@ -102,10 +109,17 @@ bool GameScene::arePlayersAllDead() const noexcept {
   return _numPlayersDead == _players.size();
 }
 
-void GameScene::updateGameVelocity() {
+const GameScene::ObstacleProperty& GameScene::getNextObstacleProperty() const
+    noexcept {
+  return _obstacleProperty;
+}
+
+float GameScene::getGameVelocity() const noexcept { return _gameVelocity; }
+
+void GameScene::updateGameVelocity() noexcept {
   constexpr float kTimeToIncrement = 0.2;
   constexpr float kDeltaIncrement = 1.f;
-  static float accumulator = 0.f;
+  static float accumulator = 0.f;  // TODO(biagio): not good for parallel
 
   if (kTimeToIncrement <= accumulator) {
     _gameVelocity += kDeltaIncrement;
@@ -113,6 +127,30 @@ void GameScene::updateGameVelocity() {
   }
 
   accumulator += Config::kDeltaTimeLogicUpdate;
+}
+
+void GameScene::computePropertyNextObstacle() noexcept {
+  static constexpr float kOffset = 68;
+  static const float kPlayerXPosition = Player::kPlayerPosition.x + kOffset;
+
+  for (const auto& obstacle : _obstacleManager.getObstacles()) {
+    const auto& position = obstacle.getPosition();
+    const float d = position.x - kPlayerXPosition;
+
+    if (d >= 0.f) {
+      const auto box = obstacle.getCollisionBox();
+      _obstacleProperty._distance = d;
+      _obstacleProperty._height = box.height;
+      _obstacleProperty._width = box.width;
+      _obstacleProperty._altitude = position.y;
+      return;
+    }
+  }
+
+  _obstacleProperty._distance = static_cast<float>(Config::kWindowWidth);
+  _obstacleProperty._height = 0.f;
+  _obstacleProperty._width = 0.f;
+  _obstacleProperty._altitude = 0.f;
 }
 
 }  // namespace aimaze2
