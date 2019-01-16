@@ -19,41 +19,6 @@
 #include <cassert>
 #include <iostream>  // TODO(biagio): delete this line as well
 #include "Config.hpp"
-#include "GenomeDrawner.hpp"  // TODO(biagio): delete this line
-
-namespace {
-
-aimaze2::Genome BuildDebugGenome() {  // TODO(biagio): delete this function
-  using aimaze2::Genome;
-  using aimaze2::InnovationHistory;
-
-  InnovationHistory innovationHistory(1);
-
-  Genome genome = Genome::CreateSimpleGenome(3, 1);
-  auto inputs = genome.getMutableInputNodes().first;
-  auto outputs = genome.getMutableOutputNodes().first;
-
-  auto node1 = inputs[0].getNodeID();
-  auto node2 = inputs[1].getNodeID();
-  auto node3 = inputs[2].getNodeID();
-  auto node4 = outputs[0].getNodeID();
-
-  genome.addConnection(node1, node4, 1.f, &innovationHistory);
-  genome.addConnection(node2, node4, 1.f, &innovationHistory);
-  genome.addConnection(node3, node4, 1.f, &innovationHistory);
-
-  auto node5 = genome.addNode(node2, node4, &innovationHistory, true);
-  auto node6 = genome.addNode(node5, node4, &innovationHistory, true);
-
-  innovationHistory.getNextInnovationNumAndIncrement();
-
-  genome.addConnection(node3, node5, 1.f, &innovationHistory);
-  genome.addConnection(node1, node6, 1.f, &innovationHistory);
-
-  return genome;
-}
-
-}  // anonymous namespace
 
 namespace aimaze2 {
 
@@ -61,6 +26,8 @@ void AIMaze::launch() {
   createAndOpenRender();
   _gameScene.init(2, &_rndEngine);
   _population.init(kSizePopulation, kNumInputs, kNumOuputs);
+  updateGenomeToDraw();  // TODO(biagio): move this method when create new
+                         // population
 
   sf::Event event;
 
@@ -112,7 +79,6 @@ bool AIMaze::drawRender() {
     _renderWindow.clear(Config::kRenderBackgroundColor);
 
     _gameScene.draw(&_renderWindow);
-    drawDebugGenome();
 
     _renderWindow.display();
     clockRender.restart();
@@ -160,13 +126,9 @@ void AIMaze::applyActionPopulation() {
   }
 }
 
-void AIMaze::drawDebugGenome() {
-  Genome genome = ::BuildDebugGenome();
-
-  GenomeDrawner drawner;
-  drawner.updateWithGenome(genome);
-
-  drawner.draw(&_renderWindow);
+void AIMaze::updateGenomeToDraw() {
+  const Genome& selectedGenome = _population.getGenome(0);
+  _gameScene.updateGenomeToDraw(selectedGenome);
 }
 
 }  // namespace aimaze2

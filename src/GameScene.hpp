@@ -21,6 +21,7 @@
 #include <utility>
 #include <vector>
 #include "CollisionManager.hpp"
+#include "GenomeDrawner.hpp"
 #include "Ground.hpp"
 #include "ObstacleManager.hpp"
 #include "Player.hpp"
@@ -56,6 +57,8 @@ class GameScene {
 
   bool arePlayersAllDead() const noexcept;
 
+  void updateGenomeToDraw(const Genome& iGenome);
+
   const ObstacleProperty& getNextObstacleProperty() const noexcept;
   float getGameVelocity() const noexcept;
 
@@ -77,6 +80,7 @@ class GameScene {
   SceneState _sceneState;
   std::size_t _numPlayersDead;
   ObstacleProperty _obstacleProperty;
+  GenomeDrawner _genomeDrawner;
 };
 
 }  // namespace aimaze2

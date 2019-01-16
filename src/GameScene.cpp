@@ -87,6 +87,7 @@ void GameScene::draw(sf::RenderWindow* oRender) const {
   for (const auto& [status, player] : _players) {
     player.draw(oRender);
   }
+  _genomeDrawner.draw(oRender);
   _score.draw(oRender);
 }
 
@@ -107,6 +108,10 @@ void GameScene::playerDuckOff(const std::size_t iIndexPlayer) {
 
 bool GameScene::arePlayersAllDead() const noexcept {
   return _numPlayersDead == _players.size();
+}
+
+void GameScene::updateGenomeToDraw(const Genome& iGenome) {
+  _genomeDrawner.updateWithGenome(iGenome);
 }
 
 const GameScene::ObstacleProperty& GameScene::getNextObstacleProperty() const

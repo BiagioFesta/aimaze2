@@ -43,8 +43,7 @@ class AIMaze {
 
   void setInputsAndFeedPopulation();
   void applyActionPopulation();
-
-  void drawDebugGenome();  // TODO(biagio): delete this
+  void updateGenomeToDraw();
 };
 
 }  // namespace aimaze2

@@ -28,6 +28,7 @@ class Population {
             const int iNumInputs,
             const int iNumOutpus);
 
+  const Genome& getGenome(const std::size_t iIndexGenome) const noexcept;
   Genome* getMutableGenome(const std::size_t iIndexGenome) noexcept;
 
  private:

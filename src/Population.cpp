@@ -27,8 +27,13 @@ void Population::init(const std::size_t iSizePopulation,
                   Genome::CreateSimpleGenome(iNumInputs, iNumOutpus));
 }
 
-Genome* Population::getMutableGenome(const std::size_t iIndexGenome) noexcept {
+const Genome& Population::getGenome(const std::size_t iIndexGenome) const
+    noexcept {
   assert(iIndexGenome < _genomes.size());
+  return _genomes[iIndexGenome];
+}
+
+Genome* Population::getMutableGenome(const std::size_t iIndexGenome) noexcept {
   return &(_genomes[iIndexGenome]);
 }
 
