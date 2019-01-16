@@ -129,7 +129,6 @@ void AIMaze::drawDebugGenome() {
   Genome genome = ::BuildDebugGenome();
 
   GenomeDrawner drawner;
-  drawner.init();
   drawner.updateWithGenome(genome);
 
   drawner.draw(&_renderWindow);

@@ -19,36 +19,30 @@
 #define AIMAZE2__GENOME_DRAWNER__HPP
 #include <SFML/Graphics.hpp>
 #include <array>
+#include <map>
+#include <vector>
 #include "Genome.hpp"
 
 namespace aimaze2 {
 
 class GenomeDrawner {
  public:
-  void init();
   void updateWithGenome(const Genome& iGenome);
   void draw(sf::RenderWindow* oRender) const;
 
  private:
-  static constexpr float kPixelSizeNode = 10.f;
+  static constexpr float kRadiusNode = 5.f;
   using NodeID = Genome::NodeID;
-  using LineSprite = std::array<sf::Vertex, 2>;
+  using LayerID = Genome::LayerID;
+  using LineShape = std::array<sf::Vertex, 2>;
 
-  struct NodeSprite {
-    NodeID _id;
-    sf::CircleShape _sprite;
-    sf::Text _label;
+  std::map<NodeID, sf::CircleShape> _nodeSprites;
+  std::vector<LineShape> _connectionSprites;
 
-    NodeSprite(const sf::Vector2f& iPosition, const NodeID iNodeID);
-  };
-
-  sf::View _view;
-  std::vector<NodeSprite> _nodeSprites;
-  std::vector<LineSprite> _connectionSprites;
-
-  void buildFromGenome(const Genome& iGenome);
-
-  const NodeSprite& getNodeSpriteFromID(const NodeID iNodeID) const;
+  void updateNodeSprites(const Genome& iGenome);
+  void updateConnectionSprites(const Genome& iGenome);
+  void drawConnections(sf::RenderWindow* oRender) const;
+  void drawNodes(sf::RenderWindow* oRender) const;
 };
 
 }  // namespace aimaze2

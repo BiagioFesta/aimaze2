@@ -17,115 +17,96 @@
 */
 #include "GenomeDrawner.hpp"
 #include <cassert>
+#include <vector>
 #include "Config.hpp"
 
 namespace aimaze2 {
 
-void GenomeDrawner::init() {
-  _view.reset(
-      sf::FloatRect{0.f, 0.f, Config::kWindowWidth, Config::kWindowHeight});
-  _view.setViewport(sf::FloatRect{0.5f, 0.1f, 1.f, 1.f});
-}
-
 void GenomeDrawner::updateWithGenome(const Genome& iGenome) {
-  buildFromGenome(iGenome);
+  updateNodeSprites(iGenome);
+  updateConnectionSprites(iGenome);
 }
 
 void GenomeDrawner::draw(sf::RenderWindow* oRender) const {
-  oRender->setView(_view);
+  sf::View view(
+      sf::FloatRect{0.f, 0.f, Config::kWindowWidth, Config::kWindowHeight});
+  view.setViewport(sf::FloatRect{0.5f, 0.03f, 1.f, 1.f});
+  oRender->setView(view);
 
-  for (const auto& connectionSprite : _connectionSprites) {
-    oRender->draw(connectionSprite.data(), connectionSprite.size(), sf::Lines);
-  }
+  drawConnections(oRender);
+  drawNodes(oRender);
 
-  for (const auto& nodeSprite : _nodeSprites) {
-    oRender->draw(nodeSprite._sprite);
-    oRender->draw(nodeSprite._label);
-  }
   oRender->setView(oRender->getDefaultView());
 }
 
-GenomeDrawner::NodeSprite::NodeSprite(const sf::Vector2f& iPosition,
-                                      const NodeID iNodeID)
-    : _id(iNodeID), _sprite(kPixelSizeNode) {
-  _sprite.setPosition(iPosition);
-  _sprite.setFillColor(Config::kFillColor);
-}
+void GenomeDrawner::updateNodeSprites(const Genome& iGenome) {
+  static constexpr float kWidthFrame = Config::kWindowWidth / 2.5;
+  static constexpr float kHeightFrame = Config::kWindowWidth / 5;
+  const auto numLayers = iGenome.getNumLayers();
 
-void GenomeDrawner::buildFromGenome(const Genome& iGenome) {
-  static constexpr float kWidthScreen =
-      static_cast<float>(Config::kWindowWidth) / 2.f;
-  static constexpr float kHeightScreen =
-      static_cast<float>(Config::kWindowHeight) / 2.f;
+  std::vector<std::vector<NodeID>> nodesPerLayer(numLayers);
+  for (const auto& node : iGenome.getIONodes()) {
+    auto layer = node.getLayerID();
+    if (layer == Genome::kIDLayerOutpus) {
+      layer = numLayers - 1;
+    }
+    const auto nodeID = node.getNodeID();
+
+    assert(layer < static_cast<int>(nodesPerLayer.size()));
+    nodesPerLayer[layer].push_back(nodeID);
+  }
+  for (const auto& node : iGenome.getHiddenNodes()) {
+    auto layer = node.getLayerID();
+    const auto nodeID = node.getNodeID();
+    assert(layer < static_cast<int>(nodesPerLayer.size()));
+    nodesPerLayer[layer].push_back(nodeID);
+  }
+
+  const float kLayerOffset = kWidthFrame / numLayers;
 
   _nodeSprites.clear();
-  _connectionSprites.clear();
+  for (std::size_t layer = 0; layer < nodesPerLayer.size(); ++layer) {
+    const auto numNodesOnLayer = nodesPerLayer[layer].size();
+    const float kNodeOffset = kHeightFrame / numNodesOnLayer;
 
-  const int numLayers = iGenome.getNumLayers();
-  const float pixelsOffSetPerLayer =
-      kWidthScreen / static_cast<float>(numLayers);
-
-  std::vector<std::vector<NodeID>> idsOnLayers;
-  idsOnLayers.resize(numLayers);
-
-  for (const auto& node : iGenome.getIONodes()) {
-    auto idLayer = node.getLayerID();
-    if (idLayer == Genome::kIDLayerOutpus) {
-      idLayer = numLayers - 1;
+    for (std::size_t n = 0; n < numNodesOnLayer; ++n) {
+      const NodeID nodeID = nodesPerLayer[layer][n];
+      auto& sprite = _nodeSprites.emplace(nodeID, kRadiusNode).first->second;
+      sprite.setFillColor(Config::kFillColor);
+      sprite.setPosition({layer * kLayerOffset, n * kNodeOffset});
     }
-
-    assert(idLayer < static_cast<int>(idsOnLayers.size()));
-    idsOnLayers[idLayer].push_back(node.getNodeID());
-  }
-
-  for (const auto& node : iGenome.getHiddenNodes()) {
-    auto idLayer = node.getLayerID();
-    assert(idLayer < static_cast<int>(idsOnLayers.size()));
-    idsOnLayers[idLayer].push_back(node.getNodeID());
-  }
-
-  sf::Vector2f positionNode;
-  for (std::size_t i = 0; i < idsOnLayers.size(); ++i) {
-    const float pixelOffsetPerLine =
-        kHeightScreen / static_cast<float>(idsOnLayers[i].size());
-
-    positionNode.y = 0;
-    for (const auto id : idsOnLayers[i]) {
-      _nodeSprites.emplace_back(positionNode, id);
-      positionNode.y += pixelOffsetPerLine;
-    }
-
-    positionNode.x += pixelsOffSetPerLayer;
-  }
-
-  for (const auto& connection : iGenome.getConnections()) {
-    const auto& spriteFrom = getNodeSpriteFromID(connection.getNodeFromID());
-    const auto& spriteTo = getNodeSpriteFromID(connection.getNodeToID());
-
-    _connectionSprites.emplace_back();
-    _connectionSprites.back()[0].position = spriteFrom._sprite.getPosition();
-    _connectionSprites.back()[0].position +=
-        sf::Vector2f{kPixelSizeNode, kPixelSizeNode};
-    _connectionSprites.back()[0].color = Config::kFillColor;
-    _connectionSprites.back()[1].position = spriteTo._sprite.getPosition();
-    _connectionSprites.back()[1].position +=
-        sf::Vector2f{kPixelSizeNode, kPixelSizeNode};
-    _connectionSprites.back()[1].color = Config::kFillColor;
   }
 }
 
-const GenomeDrawner::NodeSprite& GenomeDrawner::getNodeSpriteFromID(
-    const NodeID iNodeID) const {
-  auto itFinder = std::find_if(_nodeSprites.cbegin(),
-                               _nodeSprites.cend(),
-                               [iNodeID](const NodeSprite& nodeSprite) {
-                                 return nodeSprite._id == iNodeID;
-                               });
-  if (itFinder == _nodeSprites.cend()) {
-    throw std::runtime_error("");
-  }
+void GenomeDrawner::updateConnectionSprites(const Genome& iGenome) {
+  _connectionSprites.clear();
+  for (const auto& connection : iGenome.getConnections()) {
+    const auto nodeFromID = connection.getNodeFromID();
+    const auto nodeToID = connection.getNodeToID();
 
-  return *itFinder;
+    const auto& spriteFrom = _nodeSprites.at(nodeFromID);
+    const auto& spriteTo = _nodeSprites.at(nodeToID);
+
+    LineShape line{spriteFrom.getPosition(), spriteTo.getPosition()};
+    line[0].color = Config::kFillColor;
+    line[0].position += sf::Vector2f{kRadiusNode, kRadiusNode};
+    line[1].color = Config::kFillColor;
+    line[1].position += sf::Vector2f{kRadiusNode, kRadiusNode};
+
+    _connectionSprites.push_back(line);
+  }
+}
+
+void GenomeDrawner::drawConnections(sf::RenderWindow* oRender) const {
+  for (const auto& connection : _connectionSprites) {
+    oRender->draw(connection.data(), connection.size(), sf::Lines);
+  }
+}
+
+void GenomeDrawner::drawNodes(sf::RenderWindow* oRender) const {
+  for (const auto& node : _nodeSprites) {
+    oRender->draw(node.second);
+  }
 }
 
 }  // namespace aimaze2
