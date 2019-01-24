@@ -31,6 +31,7 @@ class ConfigEvolution {
   static constexpr float kWeightsCoefficient = 3.f;
   static constexpr int kNormalizeSizeGene = 20;
   static constexpr float kThresholdSpeciate = 3.0f;
+  static constexpr int kMaxStalenessSpecies = 15;
 };
 
 }  // namespace aimaze2

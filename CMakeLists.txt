@@ -22,7 +22,8 @@ add_executable(${PROJECT_NAME}
   ${PROJECT_SOURCE_DIR}/src/GeneConnection.cpp
   ${PROJECT_SOURCE_DIR}/src/InnovationHistory.cpp
   ${PROJECT_SOURCE_DIR}/src/GenomeDrawner.cpp
-  ${PROJECT_SOURCE_DIR}/src/Population.cpp)
+  ${PROJECT_SOURCE_DIR}/src/Population.cpp
+  ${PROJECT_SOURCE_DIR}/src/Species.cpp)
 target_link_libraries(${PROJECT_NAME} sfml-graphics sfml-window sfml-system)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
@@ -33,10 +34,13 @@ if(${BUILD_TESTS})
   add_executable(${PROJECT_NAME}_test
     ${PROJECT_SOURCE_DIR}/test/main.cpp
     ${PROJECT_SOURCE_DIR}/test/testGenome.cpp
+    ${PROJECT_SOURCE_DIR}/test/testPopulation.cpp
     ${PROJECT_SOURCE_DIR}/src/Genome.cpp
     ${PROJECT_SOURCE_DIR}/src/GeneNode.cpp
     ${PROJECT_SOURCE_DIR}/src/GeneConnection.cpp
-    ${PROJECT_SOURCE_DIR}/src/InnovationHistory.cpp)
+    ${PROJECT_SOURCE_DIR}/src/InnovationHistory.cpp
+    ${PROJECT_SOURCE_DIR}/src/Population.cpp
+    ${PROJECT_SOURCE_DIR}/src/Species.cpp)
   target_include_directories(${PROJECT_NAME}_test PRIVATE src)
   target_link_libraries(${PROJECT_NAME}_test GTest::GTest GTest::Main)
   target_compile_features(${PROJECT_NAME}_test PRIVATE cxx_std_17)

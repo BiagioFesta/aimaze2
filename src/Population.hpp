@@ -19,6 +19,7 @@
 #define AIMAZE2__POPULATION__HPP
 #include <vector>
 #include "Genome.hpp"
+#include "Species.hpp"
 
 namespace aimaze2 {
 
@@ -31,8 +32,24 @@ class Population {
   const Genome& getGenome(const std::size_t iIndexGenome) const noexcept;
   Genome* getMutableGenome(const std::size_t iIndexGenome) noexcept;
 
+  void setAllFitness(std::vector<float> iFitness);
+  void naturalSelection();
+
+  std::size_t getPopulationSize() const noexcept;
+  std::size_t getSpeciesSize() const noexcept;
+
  private:
+  void speciate();
+  void adjustFitnessWithinSpecies();
+  void updateFitnessSpecies();
+  void sortSpecies();
+  void killEmptySpecies();
+  void killStaleSpecies();
+  void evolutionEpoch();
+
   std::vector<Genome> _genomes;
+  std::vector<float> _fitness;
+  std::vector<Species> _species;
 };
 
 }  // namespace aimaze2
