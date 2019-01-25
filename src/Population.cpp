@@ -237,7 +237,9 @@ void Population::evolutionEpoch(ConfigEvolution::RndEngine* ioRndEngine) {
     }
   }  // for all s species
 
-  assert(newPopulationIndices.size() == sizePopulation);
+  assert(newPopulationIndices.size() <= sizePopulation);
+
+  // TODO(biagio): do something when newpop < sizePop
 
   std::vector<Genome> newPopulation;
   newPopulation.reserve(sizePopulation);
@@ -249,6 +251,7 @@ void Population::evolutionEpoch(ConfigEvolution::RndEngine* ioRndEngine) {
   }
 
   _genomes = std::move(newPopulation);
+  assert(_genomes.size() == sizePopulation);
 }
 
 Population::IndexGenome Population::pickIndexGenomeFromSpecies(

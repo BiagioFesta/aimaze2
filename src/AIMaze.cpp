@@ -64,6 +64,7 @@ int AIMaze::update() {
     if (_gameScene.arePlayersAllDead()) {
       _population.setAllFitness(_gameScene.getPlayerScores());
       _population.naturalSelection(&_rndEngine);
+      updateGenomeToDraw();
       _gameScene.init(kSizePopulation, &_rndEngine);
     } else {
       setInputsAndFeedPopulation();

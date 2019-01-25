@@ -30,7 +30,7 @@ class AIMaze {
  private:
   static constexpr int kNumInputs = 5;
   static constexpr int kNumOuputs = 2;
-  static constexpr std::size_t kSizePopulation = 2;
+  static constexpr std::size_t kSizePopulation = 1;
 
   sf::RenderWindow _renderWindow;
   Config::RndEngine _rndEngine;  // TODO(biagio): has to be initialized
