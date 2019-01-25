@@ -34,6 +34,7 @@ class GeneConnection {
   NodeID getNodeFromID() const noexcept;
   NodeID getNodeToID() const noexcept;
   float getWeight() const noexcept;
+  void setWeight(const float iWeight) noexcept;
   InnovationNum getInnovationNum() const noexcept;
   bool isEnabled() const noexcept;
   void setEnabled(const bool iEnabled) noexcept;

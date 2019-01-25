@@ -32,6 +32,12 @@ class ConfigEvolution {
   static constexpr int kNormalizeSizeGene = 20;
   static constexpr float kThresholdSpeciate = 3.0f;
   static constexpr int kMaxStalenessSpecies = 15;
+  static constexpr float kPercentageCullSpecies = 0.5f;
+  static constexpr float kProbabilityCloneParent = 0.25f;
+  static constexpr float kProbabilityMutateWeights = 0.8f;
+  static constexpr float kProbabilityNewNode = 0.02f;
+  static constexpr float kProbabilityNewConnection = 0.08f;
+  static constexpr float kProbabilityResetWeight = 0.1f;
 };
 
 }  // namespace aimaze2

@@ -38,6 +38,10 @@ GeneConnection::NodeID GeneConnection::getNodeToID() const noexcept {
 
 float GeneConnection::getWeight() const noexcept { return _weight; }
 
+void GeneConnection::setWeight(const float iWeight) noexcept {
+  _weight = iWeight;
+}
+
 GeneConnection::InnovationNum GeneConnection::getInnovationNum() const
     noexcept {
   return _innovationNum;

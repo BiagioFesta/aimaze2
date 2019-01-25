@@ -40,6 +40,20 @@ bool LaunchCoin(aimaze2::ConfigEvolution::RndEngine* iRndEngine) {
   return coin(*iRndEngine);
 }
 
+float RndWeight(aimaze2::ConfigEvolution::RndEngine* iRndEngine) {
+  // TODO(biagio): check this
+  return ::RndProbability(iRndEngine) * 4.f - 2.f;
+}
+
+float PerturbeWeight(aimaze2::ConfigEvolution::RndEngine* iRndEngine,
+                     float iWeight) {
+  static constexpr float kStep = 0.1f;
+
+  // TODO(biagio): check this
+  iWeight = iWeight + ::RndProbability(iRndEngine) * kStep * 2 - kStep;
+  return iWeight;
+}
+
 }  // namespace
 
 namespace aimaze2 {
@@ -203,6 +217,30 @@ int Genome::getNumActiveConnections() const noexcept {
 }
 
 int Genome::getNumLayers() const noexcept { return _numLayers; }
+
+void Genome::mutate(ConfigEvolution::RndEngine* iRndEngine,
+                    InnovationHistory* ioInnovationHistory) {
+  if (getNumConnections() == 0) {
+    addRndConnection(iRndEngine, ioInnovationHistory);
+  }
+
+  float probability;
+
+  probability = ::RndProbability(iRndEngine);
+  if (probability < ConfigEvolution::kProbabilityMutateWeights) {
+    mutateAllWeights(iRndEngine);
+  }
+
+  probability = ::RndProbability(iRndEngine);
+  if (probability < ConfigEvolution::kProbabilityNewNode) {
+    addRndNode(iRndEngine, ioInnovationHistory);
+  }
+
+  probability = ::RndProbability(iRndEngine);
+  if (probability < ConfigEvolution::kProbabilityNewConnection) {
+    addRndConnection(iRndEngine, ioInnovationHistory);
+  }
+}
 
 void Genome::addConnection(const NodeID iNodeFromID,
                            const NodeID iNodeToID,
@@ -554,6 +592,72 @@ bool Genome::areSameInnovationNumberInConnections() const {
   }
 
   return visitedInnovationNums.size() != _geneConnections.size();
+}
+
+bool Genome::addRndConnection(ConfigEvolution::RndEngine* iRndEngine,
+                              InnovationHistory* ioInnovationHistory) {
+  const NodeID nodeA = getRndNodeID(iRndEngine);
+  const NodeID nodeB = getRndNodeID(iRndEngine);
+
+  if (canBeLinked(nodeA, nodeB)) {
+    addConnection(nodeA, nodeB, ::RndWeight(iRndEngine), ioInnovationHistory);
+    return true;
+  } else if (canBeLinked(nodeB, nodeA)) {
+    addConnection(nodeB, nodeA, ::RndWeight(iRndEngine), ioInnovationHistory);
+    return true;
+  }
+  return false;
+}
+
+bool Genome::addRndNode(ConfigEvolution::RndEngine* iRndEngine,
+                        InnovationHistory* ioInnovationHistory) {
+  GeneConnection* connection = getRndConnection(iRndEngine);
+  if (connection && !isConnectionReferBias(*connection)) {
+    addNode(connection, ioInnovationHistory, true);
+    return true;
+  }
+  return false;
+}
+
+void Genome::mutateAllWeights(ConfigEvolution::RndEngine* iRndEngine) {
+  for (auto& connection : _geneConnections) {
+    const float probability = ::RndProbability(iRndEngine);
+
+    if (probability < ConfigEvolution::kProbabilityResetWeight) {
+      connection.setWeight(::RndWeight(iRndEngine));
+    } else {
+      const float newWeight =
+          ::PerturbeWeight(iRndEngine, connection.getWeight());
+      connection.setWeight(newWeight);
+    }
+  }
+}
+
+Genome::NodeID Genome::getRndNodeID(
+    ConfigEvolution::RndEngine* iRndEngine) const {
+  assert(getTotalNumNodes() > 0);
+  std::uniform_int_distribution<std::size_t> rndIndex(0,
+                                                      getTotalNumNodes() - 1);
+  const std::size_t index = rndIndex(*iRndEngine);
+  if (index < _geneNodesIO.size()) {
+    return _geneNodesIO[index].getNodeID();
+  }
+
+  const std::size_t indexHidden = index - _geneNodesIO.size();
+
+  assert(indexHidden < _geneNodesHidden.size());
+  return _geneNodesHidden[indexHidden].getNodeID();
+}
+
+GeneConnection* Genome::getRndConnection(
+    ConfigEvolution::RndEngine* iRndEngine) {
+  if (_geneConnections.empty()) {
+    return nullptr;
+  }
+
+  std::uniform_int_distribution<std::size_t> rndIndex(
+      0, _geneConnections.size() - 1);
+  return &(_geneConnections[rndIndex(*iRndEngine)]);
 }
 
 }  // namespace aimaze2

@@ -61,6 +61,9 @@ class Genome {
 
   int getNumLayers() const noexcept;
 
+  void mutate(ConfigEvolution::RndEngine* iRndEngine,
+              InnovationHistory* ioInnovationHistory);
+
   /*! \note Preconditions: The nodes can be linked.
    *  \see canBeLinked
    */
@@ -138,6 +141,13 @@ class Genome {
   bool areConnectionsValid() const;
   bool isNumLayersValid() const;
   bool areSameInnovationNumberInConnections() const;
+  bool addRndConnection(ConfigEvolution::RndEngine* iRndEngine,
+                        InnovationHistory* ioInnovationHistory);
+  bool addRndNode(ConfigEvolution::RndEngine* iRndEngine,
+                  InnovationHistory* ioInnovationHistory);
+  void mutateAllWeights(ConfigEvolution::RndEngine* iRndEngine);
+  NodeID getRndNodeID(ConfigEvolution::RndEngine* iRndEngine) const;
+  GeneConnection* getRndConnection(ConfigEvolution::RndEngine* iRndEngine);
 
   static float computeSimilaritySpecie(const Genome& iGenomeA,
                                        const Genome& iGenomeB);
