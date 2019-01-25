@@ -34,6 +34,8 @@ float RndProbability(aimaze2::ConfigEvolution::RndEngine* iRndEngine) {
 
 namespace aimaze2 {
 
+Population::Population() : _innovationHistory(0) {}
+
 void Population::init(const std::size_t iSizePopulation,
                       const int iNumInputs,
                       const int iNumOutpus) {
@@ -49,6 +51,7 @@ const Genome& Population::getGenome(const std::size_t iIndexGenome) const
 }
 
 Genome* Population::getMutableGenome(const std::size_t iIndexGenome) noexcept {
+  assert(iIndexGenome < _genomes.size());
   return &(_genomes[iIndexGenome]);
 }
 
@@ -190,8 +193,6 @@ void Population::cullSpecies() {
 void Population::evolutionEpoch(ConfigEvolution::RndEngine* ioRndEngine) {
   assert(_sumOfFitnessSum != 0.f);
 
-  InnovationHistory innovationHistory(0);
-
   const std::size_t sizePopulation = _genomes.size();
 
   std::vector<IndexGenome> newPopulationIndices;
@@ -233,20 +234,18 @@ void Population::evolutionEpoch(ConfigEvolution::RndEngine* ioRndEngine) {
         _genomes.push_back(Genome::Crossover(
             &_genomes[indices.first], &_genomes[indices.second], ioRndEngine));
       }
-
-      const IndexGenome indexLastNew = newPopulationIndices.back();
-      assert(indexLastNew < _genomes.size());
-      _genomes[indexLastNew].mutate(ioRndEngine, &innovationHistory);
     }
   }  // for all s species
 
   assert(newPopulationIndices.size() == sizePopulation);
+
   std::vector<Genome> newPopulation;
   newPopulation.reserve(sizePopulation);
 
   for (const IndexGenome index : newPopulationIndices) {
     assert(index < _genomes.size());
-    newPopulation.push_back(std::move(_genomes[index]));
+    newPopulation.push_back(_genomes[index]);
+    newPopulation.back().mutate(ioRndEngine, &_innovationHistory);
   }
 
   _genomes = std::move(newPopulation);
@@ -258,17 +257,7 @@ Population::IndexGenome Population::pickIndexGenomeFromSpecies(
   assert(iIndexSpecies < _species.size());
 
   const Species& species = _species[iIndexSpecies];
-  const float sumFitness = std::accumulate(
-      species.begin(),
-      species.end(),
-      0.f,
-      [this](const Species::IndexGenome iIndexGenomeA,
-             const Species::IndexGenome iIndexGenomeB) {
-        assert(iIndexGenomeA < _genomes.size());
-        assert(iIndexGenomeB < _genomes.size());
-
-        return _fitness[iIndexGenomeA] + _fitness[iIndexGenomeB];
-      });
+  const float sumFitness = species.getSumFitness();
 
   std::uniform_real_distribution<float> rndPick(0.f, sumFitness);
   const float rndPickValue = rndPick(*ioRndEngine);

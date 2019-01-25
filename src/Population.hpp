@@ -25,6 +25,8 @@ namespace aimaze2 {
 
 class Population {
  public:
+  Population();
+
   void init(const std::size_t iSizePopulation,
             const int iNumInputs,
             const int iNumOutpus);
@@ -50,6 +52,7 @@ class Population {
   void cullSpecies();
   void evolutionEpoch(ConfigEvolution::RndEngine* ioRndEngine);
 
+  InnovationHistory _innovationHistory;
   std::vector<Genome> _genomes;
   std::vector<float> _fitness;
   std::vector<Species> _species;

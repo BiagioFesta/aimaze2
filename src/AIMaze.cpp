@@ -24,7 +24,7 @@ namespace aimaze2 {
 
 void AIMaze::launch() {
   createAndOpenRender();
-  _gameScene.init(2, &_rndEngine);
+  _gameScene.init(kSizePopulation, &_rndEngine);
   _population.init(kSizePopulation, kNumInputs, kNumOuputs);
   updateGenomeToDraw();  // TODO(biagio): move this method when create new
                          // population
@@ -61,8 +61,14 @@ int AIMaze::update() {
   accumulator += clockUpdate.restart().asSeconds();
   while (accumulator >= Config::kDeltaTimeLogicUpdate) {
     _gameScene.update(&_rndEngine);
-    setInputsAndFeedPopulation();
-    applyActionPopulation();
+    if (_gameScene.arePlayersAllDead()) {
+      _population.setAllFitness(_gameScene.getPlayerScores());
+      _population.naturalSelection(&_rndEngine);
+      _gameScene.init(kSizePopulation, &_rndEngine);
+    } else {
+      setInputsAndFeedPopulation();
+      applyActionPopulation();
+    }
     ++numFrame;
     accumulator -= Config::kDeltaTimeLogicUpdate;
   }

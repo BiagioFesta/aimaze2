@@ -56,6 +56,7 @@ class GameScene {
   void playerDuckOff(const std::size_t iIndexPlayer);
 
   bool arePlayersAllDead() const noexcept;
+  const std::vector<float>& getPlayerScores() const noexcept;
 
   void updateGenomeToDraw(const Genome& iGenome);
 

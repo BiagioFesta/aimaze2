@@ -110,6 +110,10 @@ bool GameScene::arePlayersAllDead() const noexcept {
   return _numPlayersDead == _players.size();
 }
 
+const std::vector<float>& GameScene::getPlayerScores() const noexcept {
+  return _playerScores;
+}
+
 void GameScene::updateGenomeToDraw(const Genome& iGenome) {
   _genomeDrawner.updateWithGenome(iGenome);
 }
