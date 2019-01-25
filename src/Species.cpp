@@ -71,4 +71,11 @@ void Species::increaseStaleness() noexcept { ++_staleness; }
 
 int Species::getStaleness() const noexcept { return _staleness; }
 
+void Species::cullLower(const float iPercentage) {
+  assert(iPercentage >= 0.f && iPercentage <= 1.f);
+  const std::size_t toErase =
+      static_cast<float>(_genomeIndices.size()) * iPercentage;
+  _genomeIndices.erase(_genomeIndices.end() - toErase, _genomeIndices.end());
+}
+
 }  // namespace aimaze2

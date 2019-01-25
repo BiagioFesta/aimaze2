@@ -52,11 +52,13 @@ class Species {
   void increaseStaleness() noexcept;
   int getStaleness() const noexcept;
 
+  void cullLower(const float iPercentage);
+
  private:
   Genome _representative;  // TODO(biagio): one day try to use shared_ptr
   Container _genomeIndices;
   float _maxFitness = 0.f;
-  float _sumFitness = 0.f;
+  float _sumFitness = 0.f;  // TODO(biagio): I don't think you need this
   int _staleness = 0;
 };
 

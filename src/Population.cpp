@@ -20,6 +20,18 @@
 #include <cassert>
 #include <utility>
 
+namespace {
+
+float RndProbability(aimaze2::ConfigEvolution::RndEngine* iRndEngine) {
+  static constexpr float kMaxFloat = std::numeric_limits<float>::max();
+
+  // TODO(biagio): to check
+  std::uniform_real_distribution<float> rnd(0, std::nextafter(1.0, kMaxFloat));
+  return rnd(*iRndEngine);
+}
+
+}  // anonymous namespace
+
 namespace aimaze2 {
 
 void Population::init(const std::size_t iSizePopulation,
@@ -44,13 +56,15 @@ void Population::setAllFitness(std::vector<float> iFitness) {
   _fitness = std::move(iFitness);
 }
 
-void Population::naturalSelection() {
+void Population::naturalSelection(ConfigEvolution::RndEngine* ioRndEngine) {
   speciate();
-  adjustFitnessWithinSpecies();
-  updateFitnessSpecies();
-  sortSpecies();
   killEmptySpecies();
+  adjustFitnessWithinSpecies();
+  sortSpecies();
+  cullSpecies();
+  updateFitnessSpecies();
   killStaleSpecies();
+  evolutionEpoch(ioRndEngine);
 }
 
 std::size_t Population::getPopulationSize() const noexcept {
@@ -98,6 +112,8 @@ void Population::adjustFitnessWithinSpecies() {
 }
 
 void Population::updateFitnessSpecies() {
+  _sumOfFitnessSum = 0.f;
+
   for (auto& species : _species) {
     float maxFitness = std::numeric_limits<float>::min();
     float sumFitness = 0.f;
@@ -115,6 +131,8 @@ void Population::updateFitnessSpecies() {
 
     species.setMaxFitness(maxFitness);
     species.setSumFitness(sumFitness);
+
+    _sumOfFitnessSum += sumFitness;
   }
 }
 
@@ -163,12 +181,111 @@ void Population::killStaleSpecies() {
                  _species.end());
 }
 
-void Population::evolutionEpoch() {
-  std::vector<Genome> newPopulation;
-  newPopulation.reserve(_genomes.size());
-
-  for (const auto& species : _species) {
+void Population::cullSpecies() {
+  for (auto& species : _species) {
+    species.cullLower(ConfigEvolution::kPercentageCullSpecies);
   }
+}
+
+void Population::evolutionEpoch(ConfigEvolution::RndEngine* ioRndEngine) {
+  assert(_sumOfFitnessSum != 0.f);
+
+  InnovationHistory innovationHistory(0);
+
+  const std::size_t sizePopulation = _genomes.size();
+
+  std::vector<IndexGenome> newPopulationIndices;
+  newPopulationIndices.reserve(sizePopulation);
+
+  for (std::size_t s = 0; s < _species.size(); ++s) {
+    const auto& species = _species[s];
+    assert(!species.isEmpty());
+
+    newPopulationIndices.push_back(species[0]);
+
+    const float ratioFitnessSum = species.getSumFitness() / _sumOfFitnessSum;
+    const int numChildren =
+        ratioFitnessSum * static_cast<float>(_genomes.size()) - 1;
+    for (int i = 0; i < numChildren; ++i) {
+      const float probability = ::RndProbability(ioRndEngine);
+
+      if (probability < ConfigEvolution::kProbabilityCloneParent) {
+        newPopulationIndices.push_back(
+            pickIndexGenomeFromSpecies(s, ioRndEngine));
+      } else {
+        const IndexGenome parentA = pickIndexGenomeFromSpecies(s, ioRndEngine);
+        const IndexGenome parentB = pickIndexGenomeFromSpecies(s, ioRndEngine);
+
+        const auto indices = std::minmax(
+            parentA,
+            parentB,
+            [this](const IndexGenome iIndexA, const IndexGenome iIndexB) {
+              assert(iIndexA < _fitness.size());
+              assert(iIndexB < _fitness.size());
+              return _fitness[iIndexA] > _fitness[iIndexB];
+            });
+
+        assert(indices.first < _genomes.size());
+        assert(indices.second < _genomes.size());
+        assert(_fitness[indices.first] >= _fitness[indices.second]);
+
+        newPopulationIndices.push_back(_genomes.size());
+        _genomes.push_back(Genome::Crossover(
+            &_genomes[indices.first], &_genomes[indices.second], ioRndEngine));
+      }
+
+      const IndexGenome indexLastNew = newPopulationIndices.back();
+      assert(indexLastNew < _genomes.size());
+      _genomes[indexLastNew].mutate(ioRndEngine, &innovationHistory);
+    }
+  }  // for all s species
+
+  assert(newPopulationIndices.size() == sizePopulation);
+  std::vector<Genome> newPopulation;
+  newPopulation.reserve(sizePopulation);
+
+  for (const IndexGenome index : newPopulationIndices) {
+    assert(index < _genomes.size());
+    newPopulation.push_back(std::move(_genomes[index]));
+  }
+
+  _genomes = std::move(newPopulation);
+}
+
+Population::IndexGenome Population::pickIndexGenomeFromSpecies(
+    const std::size_t iIndexSpecies,
+    ConfigEvolution::RndEngine* ioRndEngine) const {
+  assert(iIndexSpecies < _species.size());
+
+  const Species& species = _species[iIndexSpecies];
+  const float sumFitness = std::accumulate(
+      species.begin(),
+      species.end(),
+      0.f,
+      [this](const Species::IndexGenome iIndexGenomeA,
+             const Species::IndexGenome iIndexGenomeB) {
+        assert(iIndexGenomeA < _genomes.size());
+        assert(iIndexGenomeB < _genomes.size());
+
+        return _fitness[iIndexGenomeA] + _fitness[iIndexGenomeB];
+      });
+
+  std::uniform_real_distribution<float> rndPick(0.f, sumFitness);
+  const float rndPickValue = rndPick(*ioRndEngine);
+
+  float runningSum = 0.f;
+  for (const Species::IndexGenome indexGenome : species) {
+    assert(indexGenome < _fitness.size());
+    assert(indexGenome < _genomes.size());
+
+    runningSum += _fitness[indexGenome];
+    if (rndPickValue < runningSum) {
+      return indexGenome;
+    }
+  }
+
+  assert(false);
+  return std::numeric_limits<Species::IndexGenome>::max();
 }
 
 }  // namespace aimaze2

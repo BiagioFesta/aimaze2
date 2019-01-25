@@ -24,6 +24,7 @@ constexpr std::size_t kSizePopulation = 3;
 constexpr int kNumInputs = 3;
 constexpr int kNumOutputs = 2;
 const std::vector<float> kFitness = {1.0, 2.0, 3.0};
+aimaze2::ConfigEvolution::RndEngine sRndEngine;
 
 }  // anonymous namespace
 
@@ -39,7 +40,7 @@ TEST(TestPopulation, NaturalSelection) {
   Population population;
   population.init(::kSizePopulation, ::kNumInputs, ::kNumOutputs);
   population.setAllFitness(kFitness);
-  population.naturalSelection();
+  population.naturalSelection(&sRndEngine);
 
   ASSERT_EQ(population.getPopulationSize(), kSizePopulation);
 }

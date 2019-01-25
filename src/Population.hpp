@@ -33,23 +33,31 @@ class Population {
   Genome* getMutableGenome(const std::size_t iIndexGenome) noexcept;
 
   void setAllFitness(std::vector<float> iFitness);
-  void naturalSelection();
+  void naturalSelection(ConfigEvolution::RndEngine* ioRndEngine);
 
   std::size_t getPopulationSize() const noexcept;
   std::size_t getSpeciesSize() const noexcept;
 
  private:
+  using IndexGenome = Species::IndexGenome;
+
   void speciate();
   void adjustFitnessWithinSpecies();
   void updateFitnessSpecies();
   void sortSpecies();
   void killEmptySpecies();
   void killStaleSpecies();
-  void evolutionEpoch();
+  void cullSpecies();
+  void evolutionEpoch(ConfigEvolution::RndEngine* ioRndEngine);
 
   std::vector<Genome> _genomes;
   std::vector<float> _fitness;
   std::vector<Species> _species;
+  float _sumOfFitnessSum;
+
+  IndexGenome pickIndexGenomeFromSpecies(
+      const std::size_t iIndexSpecies,
+      ConfigEvolution::RndEngine* ioRndEngine) const;
 };
 
 }  // namespace aimaze2
