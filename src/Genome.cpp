@@ -22,6 +22,7 @@
 #include <limits>
 #include <random>
 #include <set>
+#include <stack>
 #include <utility>
 #include <vector>
 
@@ -446,7 +447,6 @@ Genome::NodeID Genome::addNode(GeneConnection* iConnection,
   const NodeID prevNodeID = iConnection->getNodeFromID();
   const NodeID nextNodeID = iConnection->getNodeToID();
   const LayerID layerNewNode = getGeneNodeByID(prevNodeID)->getLayerID() + 1;
-  // TODO(biagio): error here! the new layer is fine but youhave to move all beyond
   const float oldWeight = iConnection->getWeight();
 
   iConnection->setEnabled(false);
@@ -455,9 +455,8 @@ Genome::NodeID Genome::addNode(GeneConnection* iConnection,
       NodeType::HIDDEN, _nextNodeId++, layerNewNode, false);
   const NodeID newNodeID = _geneNodesHidden.back().getNodeID();
 
-  if (layerNewNode > _numLayers - 2) {
-    ++_numLayers;
-  }
+  shiftNodesToUpperLayer(getMutableGeneNodeByID(nextNodeID));
+  updateNumLayers();
 
   addConnection(prevNodeID, newNodeID, 1.f, ioInnovationHistory);
   addConnection(newNodeID, nextNodeID, oldWeight, ioInnovationHistory);
@@ -523,6 +522,22 @@ const GeneNode* Genome::getGeneNodeByID(const NodeID iNodeID) const {
   return nullptr;
 }
 
+GeneNode* Genome::getMutableGeneNodeByID(const NodeID iNodeID) {
+  for (auto& node : _geneNodesIO) {
+    if (node.getNodeID() == iNodeID) {
+      return &node;
+    }
+  }
+
+  for (auto& node : _geneNodesHidden) {
+    if (node.getNodeID() == iNodeID) {
+      return &node;
+    }
+  }
+
+  return nullptr;
+}
+
 void Genome::computeIncomeConnections(
     const GeneNode& iNode,
     std::vector<const GeneConnection*>* oIncomeConnections) const {
@@ -532,6 +547,19 @@ void Genome::computeIncomeConnections(
   for (const auto& connection : _geneConnections) {
     if (connection.getNodeToID() == iNodeID) {
       oIncomeConnections->push_back(&connection);
+    }
+  }
+}
+
+void Genome::computeOutgoingconnections(
+    const GeneNode& iNode,
+    std::vector<const GeneConnection*>* oOutgoingConnections) const {
+  oOutgoingConnections->clear();
+
+  const NodeID iNodeID = iNode.getNodeID();
+  for (const auto& connection : _geneConnections) {
+    if (connection.getNodeFromID() == iNodeID) {
+      oOutgoingConnections->push_back(&connection);
     }
   }
 }
@@ -659,6 +687,40 @@ GeneConnection* Genome::getRndConnection(
   std::uniform_int_distribution<std::size_t> rndIndex(
       0, _geneConnections.size() - 1);
   return &(_geneConnections[rndIndex(*iRndEngine)]);
+}
+
+void Genome::shiftNodesToUpperLayer(GeneNode* iNode) {
+  assert(iNode);
+
+  std::stack<GeneNode*> openList;
+  openList.push(iNode);
+
+  std::vector<const GeneConnection*> outConnections;
+  LayerID maxLayer = kIDLayerInputs;
+
+  while (!openList.empty()) {
+    GeneNode* const current = openList.top();
+    openList.pop();
+    if (current->getNodeType() == GeneNode::NodeType::HIDDEN) {
+      maxLayer = std::max(maxLayer, current->getLayerID());
+      current->setLayerID(current->getLayerID() + 1);
+    }
+
+    computeOutgoingconnections(*current, &outConnections);
+    for (const auto& connection : outConnections) {
+      openList.push(getMutableGeneNodeByID(connection->getNodeToID()));
+    }
+  }
+}
+
+void Genome::updateNumLayers() {
+  auto itMax =
+      std::max_element(_geneNodesHidden.cbegin(),
+                       _geneNodesHidden.cend(),
+                       [](const GeneNode& iNodeA, const GeneNode& iNodeB) {
+                         return iNodeA.getLayerID() < iNodeB.getLayerID();
+                       });
+  _numLayers = 2 + (itMax != _geneNodesHidden.cend() ? itMax->getLayerID() : 0);
 }
 
 }  // namespace aimaze2

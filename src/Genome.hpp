@@ -131,10 +131,15 @@ class Genome {
                                           const NodeID iNodeToID);
 
   const GeneNode* getGeneNodeByID(const NodeID iNodeID) const;
+  GeneNode* getMutableGeneNodeByID(const NodeID iNodeID);
 
   void computeIncomeConnections(
       const GeneNode& iNode,
       std::vector<const GeneConnection*>* oIncomeConnections) const;
+
+  void computeOutgoingconnections(
+      const GeneNode& iNode,
+      std::vector<const GeneConnection*>* oOutgoingConnections) const;
 
   bool areIONodesValidType() const;
   bool areHiddenNodesValidType() const;
@@ -148,6 +153,8 @@ class Genome {
   void mutateAllWeights(ConfigEvolution::RndEngine* iRndEngine);
   NodeID getRndNodeID(ConfigEvolution::RndEngine* iRndEngine) const;
   GeneConnection* getRndConnection(ConfigEvolution::RndEngine* iRndEngine);
+  void shiftNodesToUpperLayer(GeneNode* iNode);
+  void updateNumLayers();
 
   static float computeSimilaritySpecie(const Genome& iGenomeA,
                                        const Genome& iGenomeB);

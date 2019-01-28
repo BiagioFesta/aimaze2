@@ -34,6 +34,7 @@ class GeneNode {
   NodeType getNodeType() const noexcept;
   NodeID getNodeID() const noexcept;
   LayerID getLayerID() const noexcept;
+  void setLayerID(const LayerID iLayerID) noexcept;
   bool isBiasNode() const noexcept;
   float getPureValue() const noexcept;
   float getValueWithActivation() const noexcept;

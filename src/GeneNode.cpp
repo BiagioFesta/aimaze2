@@ -36,6 +36,10 @@ GeneNode::NodeID GeneNode::getNodeID() const noexcept { return _nodeID; }
 
 GeneNode::LayerID GeneNode::getLayerID() const noexcept { return _layerID; }
 
+void GeneNode::setLayerID(const LayerID iLayerID) noexcept {
+  _layerID = iLayerID;
+}
+
 bool GeneNode::isBiasNode() const noexcept { return _isBias; }
 
 float GeneNode::getPureValue() const noexcept { return _value; }
