@@ -51,10 +51,12 @@ void Player::update(const float iGameVelocity) {
 }
 
 void Player::draw(sf::RenderWindow* oRender) const {
-  oRender->draw(_playerSprite);
+  if (_dead == false) {
+    oRender->draw(_playerSprite);
 
-  if constexpr (Config::kDrawCollisionBox) {
-    drawCollisionBox(oRender);
+    if constexpr (Config::kDrawCollisionBox) {
+      drawCollisionBox(oRender);
+    }
   }
 }
 
