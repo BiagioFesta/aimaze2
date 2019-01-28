@@ -38,10 +38,12 @@ Population::Population() : _innovationHistory(0) {}
 
 void Population::init(const std::size_t iSizePopulation,
                       const int iNumInputs,
-                      const int iNumOutpus) {
+                      const int iNumOutputs) {
   _genomes.resize(iSizePopulation,
-                  Genome::CreateSimpleGenome(iNumInputs, iNumOutpus));
+                  Genome::CreateSimpleGenome(iNumInputs, iNumOutputs));
   _species.clear();
+  _numInputs = iNumInputs;
+  _numOutputs = iNumOutputs;
 }
 
 const Genome& Population::getGenome(const std::size_t iIndexGenome) const
@@ -193,16 +195,17 @@ void Population::cullSpecies() {
 void Population::evolutionEpoch(ConfigEvolution::RndEngine* ioRndEngine) {
   assert(_sumOfFitnessSum != 0.f);
 
-  const std::size_t sizePopulation = _genomes.size();
+  const std::size_t kSizePopulation = _genomes.size();
 
-  std::vector<IndexGenome> newPopulationIndices;
-  newPopulationIndices.reserve(sizePopulation);
+  std::vector<Genome> newPopulation;
+  newPopulation.reserve(kSizePopulation);
 
   for (std::size_t s = 0; s < _species.size(); ++s) {
     const auto& species = _species[s];
     assert(!species.isEmpty());
 
-    newPopulationIndices.push_back(species[0]);
+    assert(species[0] < _genomes.size());
+    newPopulation.push_back(_genomes[species[0]]);
 
     const float ratioFitnessSum = species.getSumFitness() / _sumOfFitnessSum;
     const int numChildren =
@@ -211,8 +214,9 @@ void Population::evolutionEpoch(ConfigEvolution::RndEngine* ioRndEngine) {
       const float probability = ::RndProbability(ioRndEngine);
 
       if (probability < ConfigEvolution::kProbabilityCloneParent) {
-        newPopulationIndices.push_back(
-            pickIndexGenomeFromSpecies(s, ioRndEngine));
+        const IndexGenome index = pickIndexGenomeFromSpecies(s, ioRndEngine);
+        assert(index < _genomes.size());
+        newPopulation.push_back(_genomes[index]);
       } else {
         const IndexGenome parentA = pickIndexGenomeFromSpecies(s, ioRndEngine);
         const IndexGenome parentB = pickIndexGenomeFromSpecies(s, ioRndEngine);
@@ -230,28 +234,23 @@ void Population::evolutionEpoch(ConfigEvolution::RndEngine* ioRndEngine) {
         assert(indices.second < _genomes.size());
         assert(_fitness[indices.first] >= _fitness[indices.second]);
 
-        newPopulationIndices.push_back(_genomes.size());
-        _genomes.push_back(Genome::Crossover(
+        newPopulation.push_back(Genome::Crossover(
             &_genomes[indices.first], &_genomes[indices.second], ioRndEngine));
       }
+
+      newPopulation.back().mutate(ioRndEngine, &_innovationHistory);
     }
   }  // for all s species
+  assert(newPopulation.size() <= kSizePopulation);
 
-  assert(newPopulationIndices.size() <= sizePopulation);
-
-  // TODO(biagio): do something when newpop < sizePop
-
-  std::vector<Genome> newPopulation;
-  newPopulation.reserve(sizePopulation);
-
-  for (const IndexGenome index : newPopulationIndices) {
-    assert(index < _genomes.size());
-    newPopulation.push_back(_genomes[index]);
-    newPopulation.back().mutate(ioRndEngine, &_innovationHistory);
+  while (newPopulation.size() < kSizePopulation) {
+    // TODO(biagio): improve this shit
+    newPopulation.push_back(
+        Genome::CreateSimpleGenome(_numInputs, _numOutputs));
   }
 
   _genomes = std::move(newPopulation);
-  assert(_genomes.size() == sizePopulation);
+  assert(_genomes.size() == kSizePopulation);
 }
 
 Population::IndexGenome Population::pickIndexGenomeFromSpecies(

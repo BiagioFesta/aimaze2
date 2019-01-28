@@ -446,6 +446,7 @@ Genome::NodeID Genome::addNode(GeneConnection* iConnection,
   const NodeID prevNodeID = iConnection->getNodeFromID();
   const NodeID nextNodeID = iConnection->getNodeToID();
   const LayerID layerNewNode = getGeneNodeByID(prevNodeID)->getLayerID() + 1;
+  // TODO(biagio): error here! the new layer is fine but youhave to move all beyond
   const float oldWeight = iConnection->getWeight();
 
   iConnection->setEnabled(false);

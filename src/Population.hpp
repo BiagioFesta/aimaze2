@@ -29,7 +29,7 @@ class Population {
 
   void init(const std::size_t iSizePopulation,
             const int iNumInputs,
-            const int iNumOutpus);
+            const int iNumOutputs);
 
   const Genome& getGenome(const std::size_t iIndexGenome) const noexcept;
   Genome* getMutableGenome(const std::size_t iIndexGenome) noexcept;
@@ -52,6 +52,8 @@ class Population {
   void cullSpecies();
   void evolutionEpoch(ConfigEvolution::RndEngine* ioRndEngine);
 
+  int _numInputs;
+  int _numOutputs;
   InnovationHistory _innovationHistory;
   std::vector<Genome> _genomes;
   std::vector<float> _fitness;
