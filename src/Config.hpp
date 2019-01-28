@@ -34,7 +34,11 @@ class Config {
   static constexpr unsigned kFPSLogicUpdate = 1000;
   static constexpr float kDeltaTimeLogicUpdate = 1.f / kFPSLogicUpdate;
   static inline const sf::Color kFillColor{0, 0, 0};
+#ifdef NDEBUG
+  static constexpr bool kDrawCollisionBox = false;
+#else
   static constexpr bool kDrawCollisionBox = true;
+#endif
   static inline const sf::Color kDebugColor{255, 0, 0};
 };
 
