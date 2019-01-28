@@ -132,9 +132,10 @@ void Population::updateFitnessSpecies() {
 
     if (maxFitness <= species.getMaxFitness()) {
       species.increaseStaleness();
+    } else {
+      species.setMaxFitness(maxFitness);
     }
 
-    species.setMaxFitness(maxFitness);
     species.setSumFitness(sumFitness);
 
     _sumOfFitnessSum += sumFitness;
