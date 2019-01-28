@@ -209,7 +209,7 @@ void Population::evolutionEpoch(ConfigEvolution::RndEngine* ioRndEngine) {
 
     const float ratioFitnessSum = species.getSumFitness() / _sumOfFitnessSum;
     const int numChildren =
-        ratioFitnessSum * static_cast<float>(_genomes.size()) - 1;
+        std::floor(ratioFitnessSum * static_cast<float>(_genomes.size())) - 1;
     for (int i = 0; i < numChildren; ++i) {
       const float probability = ::RndProbability(ioRndEngine);
 
@@ -244,9 +244,14 @@ void Population::evolutionEpoch(ConfigEvolution::RndEngine* ioRndEngine) {
   assert(newPopulation.size() <= kSizePopulation);
 
   while (newPopulation.size() < kSizePopulation) {
-    // TODO(biagio): improve this shit
-    newPopulation.push_back(
-        Genome::CreateSimpleGenome(_numInputs, _numOutputs));
+    if (!_species.empty()) {
+      const auto& bestSpecies = _species.front();
+      assert(!bestSpecies.isEmpty());
+      newPopulation.push_back(_genomes[bestSpecies[0]]);
+    } else {
+      newPopulation.push_back(
+          Genome::CreateSimpleGenome(_numInputs, _numOutputs));
+    }
   }
 
   _genomes = std::move(newPopulation);

@@ -17,6 +17,7 @@
 */
 #include "AIMaze.hpp"
 #include <cassert>
+#include <chrono>
 #include <iostream>  // TODO(biagio): delete this line as well
 #include "Config.hpp"
 
@@ -24,10 +25,13 @@ namespace aimaze2 {
 
 void AIMaze::launch() {
   createAndOpenRender();
+  initSeedRndEngine();
   _gameScene.init(kSizePopulation, &_rndEngine);
   _population.init(kSizePopulation, kNumInputs, kNumOuputs);
-  updateGenomeToDraw();  // TODO(biagio): move this method when create new
-                         // population
+  updateGenomeToDraw();
+
+  printInfoProgram();
+  _epoch = 0;
 
   sf::Event event;
 
@@ -65,6 +69,8 @@ int AIMaze::update() {
       _population.setAllFitness(_gameScene.getPlayerScores());
       _population.naturalSelection(&_rndEngine);
       updateGenomeToDraw();
+      printEpochInfo();
+      ++_epoch;
       _gameScene.init(kSizePopulation, &_rndEngine);
     } else {
       setInputsAndFeedPopulation();
@@ -136,6 +142,26 @@ void AIMaze::applyActionPopulation() {
 void AIMaze::updateGenomeToDraw() {
   const Genome& selectedGenome = _population.getGenome(0);
   _gameScene.updateGenomeToDraw(selectedGenome);
+}
+
+void AIMaze::initSeedRndEngine() {
+#ifdef NDEBUG
+  _seed = static_cast<Config::RndEngine::result_type>(
+      std::chrono::system_clock::now().time_since_epoch().count());
+#else
+  _seed = 0;
+#endif
+  _rndEngine.seed(_seed);
+}
+
+void AIMaze::printInfoProgram() const {
+  std::cout << "AIMaze2\n"
+            << "Seed RndEngine: " << _seed << "\n"
+            << "Population Size: " << kSizePopulation << "\n";
+}
+
+void AIMaze::printEpochInfo() const {
+  std::cout << "  Epoch " << _epoch << "\n";
 }
 
 }  // namespace aimaze2

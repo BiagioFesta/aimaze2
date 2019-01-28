@@ -30,12 +30,18 @@ class AIMaze {
  private:
   static constexpr int kNumInputs = 5;
   static constexpr int kNumOuputs = 2;
-  static constexpr std::size_t kSizePopulation = 200;
+#ifdef NDEBUG
+  static constexpr std::size_t kSizePopulation = 300;
+#else
+  static constexpr std::size_t kSizePopulation = 100;
+#endif
 
   sf::RenderWindow _renderWindow;
-  Config::RndEngine _rndEngine;  // TODO(biagio): has to be initialized
+  Config::RndEngine::result_type _seed;
+  Config::RndEngine _rndEngine;
   GameScene _gameScene;
   Population _population;
+  int _epoch = 0;
 
   void createAndOpenRender();
   int update();
@@ -44,6 +50,9 @@ class AIMaze {
   void setInputsAndFeedPopulation();
   void applyActionPopulation();
   void updateGenomeToDraw();
+  void initSeedRndEngine();
+  void printInfoProgram() const;
+  void printEpochInfo() const;
 };
 
 }  // namespace aimaze2
