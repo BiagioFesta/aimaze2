@@ -629,16 +629,22 @@ bool Genome::areSameInnovationNumberInConnections() const {
 
 bool Genome::addRndConnection(ConfigEvolution::RndEngine* iRndEngine,
                               InnovationHistory* ioInnovationHistory) {
-  const NodeID nodeA = getRndNodeID(iRndEngine);
-  const NodeID nodeB = getRndNodeID(iRndEngine);
+  auto candidateNodes = computeAllNodeIDs();
+  std::shuffle(candidateNodes.begin(), candidateNodes.end(), *iRndEngine);
 
-  if (canBeLinked(nodeA, nodeB)) {
-    addConnection(nodeA, nodeB, ::RndWeight(iRndEngine), ioInnovationHistory);
-    return true;
-  } else if (canBeLinked(nodeB, nodeA)) {
-    addConnection(nodeB, nodeA, ::RndWeight(iRndEngine), ioInnovationHistory);
-    return true;
+  for (const NodeID nodeFrom : candidateNodes) {
+    auto candidateLinks = computeForwardNodes(nodeFrom);
+    std::shuffle(candidateLinks.begin(), candidateLinks.end(), *iRndEngine);
+
+    for (const NodeID nodeTo : candidateLinks) {
+      if (canBeLinked(nodeFrom, nodeTo)) {
+        addConnection(
+            nodeFrom, nodeTo, ::RndWeight(iRndEngine), ioInnovationHistory);
+        return true;
+      }
+    }
   }
+
   return false;
 }
 
@@ -725,6 +731,44 @@ void Genome::updateNumLayers() {
                          return iNodeA.getLayerID() < iNodeB.getLayerID();
                        });
   _numLayers = 2 + (itMax != _geneNodesHidden.cend() ? itMax->getLayerID() : 0);
+}
+
+std::vector<Genome::NodeID> Genome::computeAllNodeIDs() const {
+  std::vector<Genome::NodeID> allNodes;
+  allNodes.reserve(getTotalNumNodes());
+
+  for (const auto& nodeIO : _geneNodesIO) {
+    allNodes.emplace_back(nodeIO.getNodeID());
+  }
+
+  for (const auto& nodeHidden : _geneNodesHidden) {
+    allNodes.emplace_back(nodeHidden.getNodeID());
+  }
+
+  return allNodes;
+}
+
+std::vector<Genome::NodeID> Genome::computeForwardNodes(
+    const NodeID iNodeFromID) const {
+  std::vector<Genome::NodeID> forwardNodes;
+  // TODO(biagio): pessimistic reserve?
+
+  const GeneNode* node = getGeneNodeByID(iNodeFromID);
+  const auto fromLayer = node->getLayerID();
+
+  for (const auto& nodeIO : _geneNodesIO) {
+    if (fromLayer < nodeIO.getLayerID()) {
+      forwardNodes.emplace_back(nodeIO.getNodeID());
+    }
+  }
+
+  for (const auto& nodeHidden : _geneNodesHidden) {
+    if (fromLayer < nodeHidden.getLayerID()) {
+      forwardNodes.emplace_back(nodeHidden.getNodeID());
+    }
+  }
+
+  return forwardNodes;
 }
 
 }  // namespace aimaze2

@@ -158,6 +158,8 @@ class Genome {
   GeneConnection* getRndConnection(ConfigEvolution::RndEngine* iRndEngine);
   void shiftNodesToUpperLayer(GeneNode* iNode);
   void updateNumLayers();
+  std::vector<NodeID> computeAllNodeIDs() const;
+  std::vector<NodeID> computeForwardNodes(const NodeID iNodeFromID) const;
 
   static float computeSimilaritySpecie(const Genome& iGenomeA,
                                        const Genome& iGenomeB);
