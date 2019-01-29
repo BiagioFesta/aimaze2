@@ -23,8 +23,10 @@
 #include "CollisionManager.hpp"
 #include "GenomeDrawner.hpp"
 #include "Ground.hpp"
+#include "InfoDrawner.hpp"
 #include "ObstacleManager.hpp"
 #include "Player.hpp"
+#include "Population.hpp"
 #include "Score.hpp"
 
 namespace aimaze2 {
@@ -51,7 +53,10 @@ class GameScene {
   void init(const std::size_t iNumPlayers,
             SeedType iSeedObstacles,
             Config::RndEngine* iRndEngine);
-  void update(Config::RndEngine* iRndEngine);
+  void update(const Population& iPopulation,
+              const Genome& iGenome,
+              const int iGenerationNum,
+              Config::RndEngine* iRndEngine);
   void draw(sf::RenderWindow* oRender) const;
 
   void playerJump(const std::size_t iIndexPlayer);
@@ -85,6 +90,7 @@ class GameScene {
   std::size_t _numPlayersDead;
   ObstacleProperty _obstacleProperty;
   GenomeDrawner _genomeDrawner;
+  InfoDrawner _infoDrawner;
 };
 
 }  // namespace aimaze2

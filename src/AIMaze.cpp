@@ -64,7 +64,8 @@ int AIMaze::update() {
   int numFrame = 0;
   accumulator += clockUpdate.restart().asSeconds();
   while (accumulator >= Config::kPeriodLogicUpdate) {
-    _gameScene.update(&_rndEngine);
+    _gameScene.update(
+        _population, _population.getGenome(0), _epoch, &_rndEngine);
     if (_gameScene.arePlayersAllDead()) {
       _population.setAllFitness(_gameScene.getPlayerScores());
       _population.naturalSelection(&_rndEngine);

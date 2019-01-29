@@ -23,7 +23,8 @@ add_executable(${PROJECT_NAME}
   ${PROJECT_SOURCE_DIR}/src/InnovationHistory.cpp
   ${PROJECT_SOURCE_DIR}/src/GenomeDrawner.cpp
   ${PROJECT_SOURCE_DIR}/src/Population.cpp
-  ${PROJECT_SOURCE_DIR}/src/Species.cpp)
+  ${PROJECT_SOURCE_DIR}/src/Species.cpp
+  ${PROJECT_SOURCE_DIR}/src/InfoDrawner.cpp)
 target_link_libraries(${PROJECT_NAME} sfml-graphics sfml-window sfml-system)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 

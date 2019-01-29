@@ -44,9 +44,14 @@ void GameScene::init(const std::size_t iNumPlayers,
   _numPlayersDead = 0;
 
   computePropertyNextObstacle();
+
+  _infoDrawner.init();
 }
 
-void GameScene::update(Config::RndEngine* iRndEngine) {
+void GameScene::update(const Population& iPopulation,
+                       const Genome& iGenome,
+                       const int iGenerationNum,
+                       Config::RndEngine* iRndEngine) {
   if (_sceneState == SceneState::RUNNING) {
     updateGameVelocity();
     _score.update(_gameVelocity);
@@ -79,11 +84,16 @@ void GameScene::update(Config::RndEngine* iRndEngine) {
 
     computePropertyNextObstacle();
 
+    _infoDrawner.update(iPopulation,
+                        _players.size() - _numPlayersDead,
+                        iGenome,
+                        iGenerationNum);
+
     if (arePlayersAllDead()) {
       _sceneState = SceneState::STOP;
     }
     // TODO(biagio): partition dead
-  }
+  }  // if scene is running
 }
 
 void GameScene::draw(sf::RenderWindow* oRender) const {
@@ -94,6 +104,7 @@ void GameScene::draw(sf::RenderWindow* oRender) const {
   }
   _genomeDrawner.draw(oRender);
   _score.draw(oRender);
+  _infoDrawner.draw(oRender);
 }
 
 void GameScene::playerJump(const std::size_t iIndexPlayer) {
