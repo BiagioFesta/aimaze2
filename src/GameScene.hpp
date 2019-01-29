@@ -49,7 +49,7 @@ class GameScene {
   };
 
   void init(const std::size_t iNumPlayers,
-            const SeedType iSeedObstacles,
+            SeedType iSeedObstacles,
             Config::RndEngine* iRndEngine);
   void update(Config::RndEngine* iRndEngine);
   void draw(sf::RenderWindow* oRender) const;

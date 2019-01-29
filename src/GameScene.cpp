@@ -21,7 +21,7 @@
 namespace aimaze2 {
 
 void GameScene::init(const std::size_t iNumPlayers,
-                     const SeedType iSeedObstacles,
+                     SeedType iSeedObstacles,
                      Config::RndEngine* iRndEngine) {
   _gameVelocity = kInitialGameVelocity;
 
@@ -34,6 +34,10 @@ void GameScene::init(const std::size_t iNumPlayers,
   }
   _playerScores.resize(iNumPlayers, 0);
   _score.init();
+
+  if constexpr (!Config::kFixedObstaclesScene) {
+    iSeedObstacles = (*iRndEngine)();
+  }
   _obstacleManager.init(iSeedObstacles);
 
   _sceneState = SceneState::RUNNING;
