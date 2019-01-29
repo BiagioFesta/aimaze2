@@ -62,7 +62,7 @@ int AIMaze::update() {
 
   int numFrame = 0;
   accumulator += clockUpdate.restart().asSeconds();
-  while (accumulator >= Config::kDeltaTimeLogicUpdate) {
+  while (accumulator >= Config::kPeriodLogicUpdate) {
     _gameScene.update(&_rndEngine);
     if (_gameScene.arePlayersAllDead()) {
       _population.setAllFitness(_gameScene.getPlayerScores());
@@ -76,7 +76,7 @@ int AIMaze::update() {
       applyActionPopulation();
     }
     ++numFrame;
-    accumulator -= Config::kDeltaTimeLogicUpdate;
+    accumulator -= Config::kPeriodLogicUpdate;
   }
 
   return numFrame;

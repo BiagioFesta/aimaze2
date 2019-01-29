@@ -33,6 +33,7 @@ class Config {
   static constexpr unsigned int kFPSRenderDraw = 120;
   static constexpr unsigned kFPSLogicUpdate = 1000;
   static constexpr float kDeltaTimeLogicUpdate = 1.f / kFPSLogicUpdate;
+  static constexpr float kPeriodLogicUpdate = kDeltaTimeLogicUpdate * 0.5f;
   static inline const sf::Color kFillColor{0, 0, 0};
 #ifdef NDEBUG
   static constexpr bool kDrawCollisionBox = false;
