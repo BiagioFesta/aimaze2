@@ -26,7 +26,8 @@ namespace aimaze2 {
 void AIMaze::launch() {
   createAndOpenRender();
   initSeedRndEngine();
-  _gameScene.init(kSizePopulation, &_rndEngine);
+
+  _gameScene.init(kSizePopulation, _seed, &_rndEngine);
   _population.init(kSizePopulation, kNumInputs, kNumOuputs);
   updateGenomeToDraw();
 
@@ -70,7 +71,7 @@ int AIMaze::update() {
       updateGenomeToDraw();
       printEpochInfo();
       ++_epoch;
-      _gameScene.init(kSizePopulation, &_rndEngine);
+      _gameScene.init(kSizePopulation, _seed, &_rndEngine);
     } else {
       setInputsAndFeedPopulation();
       applyActionPopulation();

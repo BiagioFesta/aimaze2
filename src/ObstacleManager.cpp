@@ -35,14 +35,14 @@ aimaze2::Obstacle::ObstacleType GetRndObstacleType(
 
 namespace aimaze2 {
 
-void ObstacleManager::init() {
+void ObstacleManager::init(const SeedType iSeed) {
+  _rndEngine.seed(iSeed);
   Obstacle::initTextures();
   _obstacles.clear();
 }
 
-void ObstacleManager::update(const float iGameVelocity,
-                             Config::RndEngine* iRndEngine) {
-  updateSpawn(iGameVelocity, iRndEngine);
+void ObstacleManager::update(const float iGameVelocity) {
+  updateSpawn(iGameVelocity);
 
   for (auto& obstacle : _obstacles) {
     obstacle.update(iGameVelocity);
@@ -63,8 +63,7 @@ const std::deque<Obstacle>& ObstacleManager::getObstacles() const noexcept {
   return _obstacles;
 }
 
-void ObstacleManager::updateSpawn(const float iGameVelocity,
-                                  Config::RndEngine* iRndEngine) {
+void ObstacleManager::updateSpawn(const float iGameVelocity) {
   constexpr float kDeltaVariance = 1.0f;
   constexpr float kSpawnBaseTime = 3.f;
   constexpr float kScaleVelocity = 0.002f;
@@ -73,14 +72,13 @@ void ObstacleManager::updateSpawn(const float iGameVelocity,
   static std::uniform_real_distribution<float> variance(-kDeltaVariance,
                                                         kDeltaVariance);
 
-  const float timeToSpawn = (kSpawnBaseTime + variance(*iRndEngine)) /
-                            (kScaleVelocity * iGameVelocity);
+  const float timeToSpawn = kSpawnBaseTime / (kScaleVelocity * iGameVelocity);
 
   if (timeToSpawn <= accumulator) {
     accumulator -= timeToSpawn;
 
     _obstacles.emplace_back();
-    _obstacles.back().init(::GetRndObstacleType(iRndEngine));
+    _obstacles.back().init(::GetRndObstacleType(&_rndEngine));
   }
   accumulator += Config::kDeltaTimeLogicUpdate;
 }

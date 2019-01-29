@@ -34,6 +34,7 @@ class GameScene {
   enum class SceneState { RUNNING, STOP };
   enum class PlayerStatus { RUNNING, DEAD };
   static inline const sf::Vector2f kPositionPlayerDead{0.f, 0.f};
+  using SeedType = ObstacleManager::SeedType;
 
   struct ObstacleProperty {
     float _distance;
@@ -47,7 +48,9 @@ class GameScene {
                      const float iAltitude) noexcept;
   };
 
-  void init(const std::size_t iNumPlayers, Config::RndEngine* iRndEngine);
+  void init(const std::size_t iNumPlayers,
+            const SeedType iSeedObstacles,
+            Config::RndEngine* iRndEngine);
   void update(Config::RndEngine* iRndEngine);
   void draw(sf::RenderWindow* oRender) const;
 

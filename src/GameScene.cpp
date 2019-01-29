@@ -21,6 +21,7 @@
 namespace aimaze2 {
 
 void GameScene::init(const std::size_t iNumPlayers,
+                     const SeedType iSeedObstacles,
                      Config::RndEngine* iRndEngine) {
   _gameVelocity = kInitialGameVelocity;
 
@@ -33,7 +34,7 @@ void GameScene::init(const std::size_t iNumPlayers,
   }
   _playerScores.resize(iNumPlayers, 0);
   _score.init();
-  _obstacleManager.init();
+  _obstacleManager.init(iSeedObstacles);
 
   _sceneState = SceneState::RUNNING;
   _numPlayersDead = 0;
@@ -51,7 +52,7 @@ void GameScene::update(Config::RndEngine* iRndEngine) {
     }
 
     _ground.update(_gameVelocity, iRndEngine);
-    _obstacleManager.update(_gameVelocity, iRndEngine);
+    _obstacleManager.update(_gameVelocity);
 
     for (std::size_t i = 0; i < _players.size(); ++i) {
       auto& player = _players[i].second;

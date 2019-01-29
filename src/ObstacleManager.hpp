@@ -24,16 +24,19 @@ namespace aimaze2 {
 
 class ObstacleManager {
  public:
-  void init();
-  void update(const float iGameVelocity, Config::RndEngine* iRndEngine);
+  using SeedType = Config::RndEngine::result_type;
+
+  void init(const SeedType iSeed);
+  void update(const float iGameVelocity);
   void draw(sf::RenderWindow* oRender) const;
 
   const std::deque<Obstacle>& getObstacles() const noexcept;
 
  private:
+  Config::RndEngine _rndEngine;
   std::deque<Obstacle> _obstacles;
 
-  void updateSpawn(const float iGameVelocity, Config::RndEngine* iRndEngine);
+  void updateSpawn(const float iGameVelocity);
 };
 
 }  // namespace aimaze2
