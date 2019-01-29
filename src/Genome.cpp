@@ -42,16 +42,16 @@ bool LaunchCoin(aimaze2::ConfigEvolution::RndEngine* iRndEngine) {
 }
 
 float RndWeight(aimaze2::ConfigEvolution::RndEngine* iRndEngine) {
-  // TODO(biagio): check this
-  return ::RndProbability(iRndEngine) * 4.f - 2.f;
+  std::uniform_real_distribution<float> rnd(-1.f, 1.f);
+  return rnd(*iRndEngine);
 }
 
 float PerturbeWeight(aimaze2::ConfigEvolution::RndEngine* iRndEngine,
                      float iWeight) {
-  static constexpr float kStep = 0.1f;
-
-  // TODO(biagio): check this
-  iWeight = iWeight + ::RndProbability(iRndEngine) * kStep * 2 - kStep;
+  std::normal_distribution<float> gaussian;
+  iWeight += gaussian(*iRndEngine) / 50.f;
+  iWeight = std::clamp(iWeight, -1.f, 1.f);
+  assert(iWeight <= 1.f && iWeight >= 1.f);
   return iWeight;
 }
 

@@ -31,7 +31,7 @@ class AIMaze {
   static constexpr int kNumInputs = 5;
   static constexpr int kNumOuputs = 2;
 #ifdef NDEBUG
-  static constexpr std::size_t kSizePopulation = 300;
+  static constexpr std::size_t kSizePopulation = 500;
 #else
   static constexpr std::size_t kSizePopulation = 100;
 #endif
