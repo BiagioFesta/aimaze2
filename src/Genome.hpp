@@ -49,6 +49,9 @@ class Genome {
   const std::vector<GeneNode>& getIONodes() const noexcept;
   const std::vector<GeneNode>& getHiddenNodes() const noexcept;
 
+  int getNumInputs() const noexcept;
+  int getNumOutputs() const noexcept;
+
   void feedForward();
 
   int getTotalNumNodes() const noexcept;

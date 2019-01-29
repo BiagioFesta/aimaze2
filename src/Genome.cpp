@@ -178,6 +178,10 @@ const std::vector<GeneNode>& Genome::getHiddenNodes() const noexcept {
   return _geneNodesHidden;
 }
 
+int Genome::getNumInputs() const noexcept { return _numInputs; }
+
+int Genome::getNumOutputs() const noexcept { return _numOutputs; }
+
 void Genome::feedForward() {
   std::sort(_geneNodesHidden.begin(),
             _geneNodesHidden.end(),
