@@ -46,8 +46,7 @@ void AIMaze::launch() {
     update();
     drawRender();
 
-    // TODO(biagio): sleep to avoid High CPU
-    sf::sleep(sf::milliseconds(1));
+    sf::sleep(sf::microseconds(1));
   }
 }
 
