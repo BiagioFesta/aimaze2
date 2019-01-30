@@ -66,6 +66,7 @@ int AIMaze::update() {
   while (accumulator >= Config::kPeriodLogicUpdate) {
     _gameScene.update(
         _population, _population.getGenome(0), _epoch, &_rndEngine);
+
     if (_gameScene.arePlayersAllDead()) {
       _population.setAllFitness(_gameScene.getPlayerScores());
       _population.naturalSelection(&_rndEngine);
@@ -77,6 +78,7 @@ int AIMaze::update() {
       setInputsAndFeedPopulation();
       applyActionPopulation();
     }
+
     ++numFrame;
     accumulator -= Config::kPeriodLogicUpdate;
   }
