@@ -21,3 +21,8 @@ Subsequently, a population of several networks will start playing the game and l
 ## Technical Aspects
  * As this project is primarily an educative study, all methodologies and the environment are implemented and written from scratch.
  * The software is entirely written in C++. In particular, the new standard C++17.
+
+---
+
+## Compilation Guide
+See the [Guide Here](https://github.com/BiagioFesta/aimaze2/wiki/Compilation-Guide) in order to compile the project.
