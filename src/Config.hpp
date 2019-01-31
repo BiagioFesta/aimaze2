@@ -41,7 +41,12 @@ class Config {
   static constexpr bool kDrawCollisionBox = true;
 #endif
   static inline const sf::Color kDebugColor{255, 0, 0};
+
+#ifdef NDEBUG
   static constexpr bool kFixedObstaclesScene = false;
+#else
+  static constexpr bool kFixedObstaclesScene = true;
+#endif
 };
 
 }  // namespace aimaze2

@@ -39,6 +39,8 @@ class InnovationHistory {
 
   InnovationNum getNextInnovationNumAndIncrement() noexcept;
 
+  void flush() noexcept;
+
  private:
   struct ConnectionHistory {
     NodeID _nodeFrom;

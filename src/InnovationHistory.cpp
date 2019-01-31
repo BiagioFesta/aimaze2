@@ -50,6 +50,8 @@ InnovationHistory::getNextInnovationNumAndIncrement() noexcept {
   return _nextInnovationNum++;
 }
 
+void InnovationHistory::flush() noexcept { return _connectionsHistory.clear(); }
+
 InnovationHistory::ConnectionHistory::ConnectionHistory(
     const NodeID iNodeFrom,
     const NodeID iNodeTo,

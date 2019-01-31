@@ -70,6 +70,7 @@ void Population::naturalSelection(ConfigEvolution::RndEngine* ioRndEngine) {
   updateFitnessSpecies();
   killStaleSpecies();
   evolutionEpoch(ioRndEngine);
+  _innovationHistory.flush();
 }
 
 std::size_t Population::getPopulationSize() const noexcept {
