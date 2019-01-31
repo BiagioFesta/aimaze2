@@ -74,6 +74,7 @@ int AIMaze::update() {
       printEpochInfo();
       ++_epoch;
       _gameScene.init(kSizePopulation, _seed, &_rndEngine);
+      clockUpdate.restart();
     } else {
       setInputsAndFeedPopulation();
       applyActionPopulation();
