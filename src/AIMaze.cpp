@@ -47,7 +47,7 @@ void AIMaze::launch() {
     update();
     drawRender();
 
-    sf::sleep(sf::microseconds(1));
+    sf::sleep(sf::microseconds(10));
   }
 }
 
